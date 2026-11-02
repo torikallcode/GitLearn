@@ -1,0 +1,861 @@
+{
+  "paths": [
+    {
+      "slug": "profesional",
+      "title": "Profesional",
+      "description": "Jalur lanjutan untuk engineer yang sudah nyaman dengan commit, branch, dan remote. Kamu akan memilih workflow tim yang tepat, merapikan sejarah, memburu bug dengan Git, merilis versi, mengotomasi pipeline, dan mengamankan repository.",
+      "order_no": 3,
+      "track": "pro",
+      "modules": [
+        {
+          "title": "Workflow Tim",
+          "description": "Model branching yang dipakai tim nyata, lengkap dengan trade-off antara rilis terjadwal dan deployment cepat.",
+          "order_no": 11,
+          "lessons": [
+            {
+              "slug": "git-flow",
+              "title": "Git Flow",
+              "estimated_minutes": 10,
+              "order_no": 1,
+              "content_md": "## Hook\n\nTim kamu merilis aplikasi setiap dua minggu. Suatu sore QA menemukan bug pembayaran di production, sementara branch `main` sudah berisi empat puluh commit fitur yang belum siap dirilis. Kamu harus memperbaiki satu file dan merilisnya malam ini juga, tanpa ikut membawa fitur setengah jadi. Git Flow dirancang untuk situasi seperti ini: memisahkan jalur rilis, pengembangan, dan perbaikan darurat.\n\n## Konsep\n\nGit Flow (dipopulerkan Vincent Driessen pada 2010) memakai dua branch abadi dan tiga jenis branch sementara:\n\n- `main` — hanya berisi kode yang sudah dirilis. Setiap commit di sini sebaiknya diberi tag versi.\n- `develop` — tempat integrasi fitur yang akan masuk rilis berikutnya.\n- `feature/*` — bercabang dari `develop`, hidup selama satu fitur, lalu merge kembali.\n- `release/*` — bercabang dari `develop` saat fitur dibekukan; hanya bugfix, dokumentasi, dan naik versi.\n- `hotfix/*` — bercabang dari `main` untuk bug production, lalu merge ke `main` **dan** `develop`.\n\nAlurnya: `feature` → `develop` → `release` → `main`, dengan `hotfix` sebagai jalur pintas dari `main`.\n\nTrade-off penting: Git Flow cocok untuk produk dengan siklus rilis jelas (aplikasi desktop, SDK, layanan enterprise). Untuk tim yang deploy berkali-kali sehari, `develop` dan `release` yang berumur panjang menunda integrasi, memicu merge besar, dan membuat perbaikan mudah hilang di rilis berikutnya. Banyak tim modern memilih GitHub Flow atau trunk-based development karena alasan ini.\n\n## Workflow\n\n```bash\ngit switch main\ngit pull origin main\ngit switch -c develop\ngit push -u origin develop\n\ngit switch -c feature/keranjang\n# kerjakan fitur, commit kecil-kecil\ngit add src/features/cart\ngit commit -m 'feat(cart): tambah tombol checkout'\n\ngit switch develop\ngit merge --no-ff feature/keranjang\ngit branch -d feature/keranjang\n```\n\nSaat fitur lengkap dan siap dibekukan:\n\n```bash\ngit switch -c release/1.4.0 develop\n# hanya bugfix dan update versi\ngit commit -am 'chore(release): siapkan 1.4.0'\ngit switch main\ngit merge --no-ff release/1.4.0\ngit tag -a v1.4.0 -m 'Release 1.4.0'\ngit switch develop\ngit merge --no-ff release/1.4.0\n```\n\nJangan lewatkan merge terakhir. Kalau `release/1.4.0` hanya masuk ke `main`, perbaikan yang dibuat selama stabilisasi tidak akan pernah sampai ke `develop`, dan bug yang sama muncul lagi di rilis berikutnya. `--no-ff` sengaja dipakai agar graph menunjukkan kapan sebuah fitur atau rilis masuk, bukan sekadar deretan commit linear.\n\n## Praktik\n\nBuat branch `develop`, lalu `feature/keranjang`. Tambahkan satu commit di fitur tersebut, kembali ke `develop`, dan merge dengan `--no-ff`. Perhatikan graph: harus ada merge commit, bukan fast-forward.\n\n## Ringkasan\n\n- `main` = production, `develop` = integrasi, `feature/*` = pekerjaan, `release/*` = stabilisasi, `hotfix/*` = darurat.\n- Hotfix wajib di-merge ke `main` dan `develop`.\n- Git Flow kuat untuk rilis terjadwal, berat untuk continuous deployment.\n\nCheat sheet: `git switch -c develop` · `git merge --no-ff feature/x` · `git switch -c release/1.4.0` · `git tag -a v1.4.0 -m 'Release 1.4.0'`.",
+              "practice_config": {
+                "scenario": "branches",
+                "goal": "Buat branch develop dan feature/keranjang, commit satu perubahan, lalu merge fitur ke develop dengan merge commit.",
+                "commands": [
+                  "git switch -c develop",
+                  "git switch -c feature/keranjang",
+                  "git add . && git commit -m 'feat: halaman keranjang'",
+                  "git switch develop && git merge --no-ff feature/keranjang"
+                ],
+                "checks": [
+                  { "type": "branch_exists", "value": "develop", "label": "Branch develop tersedia" },
+                  { "type": "branch_exists", "value": "feature/keranjang", "label": "Branch fitur dibuat" },
+                  { "type": "branch_merged", "value": "feature/keranjang", "into": "develop", "label": "Fitur sudah di-merge ke develop" },
+                  { "type": "commit_message_contains", "value": "keranjang", "label": "Ada commit fitur keranjang" }
+                ],
+                "hints": [
+                  "Git Flow selalu punya branch integrasi sebelum branch fitur.",
+                  "Buat develop dulu, baru bercabang feature/keranjang dari sana.",
+                  "Kembali ke develop lalu jalankan git merge --no-ff feature/keranjang."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Di Git Flow, dari branch mana branch feature biasanya dibuat?",
+                  "explanation": "Feature dibuat dari develop karena develop adalah jalur integrasi untuk rilis berikutnya. Membuat feature dari main membuat fitur ikut membawa state production dan rawan konflik saat merge kembali.",
+                  "options": [
+                    { "text": "develop", "correct": true },
+                    { "text": "main", "correct": false },
+                    { "text": "release terakhir", "correct": false },
+                    { "text": "hotfix yang sedang aktif", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Kapan Git Flow paling kurang cocok dipakai?",
+                  "explanation": "Git Flow dirancang untuk rilis terjadwal. Tim yang deploy beberapa kali sehari akan tertahan oleh branch develop dan release yang berumur panjang; GitHub Flow atau trunk-based lebih sesuai.",
+                  "options": [
+                    { "text": "Tim yang deploy ke production berkali-kali sehari", "correct": true },
+                    { "text": "Produk enterprise dengan versi rilis dua mingguan", "correct": false },
+                    { "text": "Aplikasi desktop yang punya banyak versi ditopang", "correct": false },
+                    { "text": "Tim yang butuh jalur hotfix terpisah", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Setelah hotfix di-merge ke main, ke mana lagi hotfix itu harus masuk?",
+                  "explanation": "Hotfix harus di-merge balik ke develop. Kalau tidak, perbaikan hanya ada di production dan bug yang sama akan kembali pada rilis berikutnya yang dibangun dari develop.",
+                  "options": [
+                    { "text": "develop", "correct": true },
+                    { "text": "Cukup ke main, develop tidak perlu", "correct": false },
+                    { "text": "Hanya ke branch release yang akan datang", "correct": false },
+                    { "text": "Tidak perlu di-merge, cukup di-tag", "correct": false }
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "github-flow-dan-trunk-based",
+              "title": "GitHub Flow & Trunk-Based Development",
+              "estimated_minutes": 9,
+              "order_no": 2,
+              "content_md": "## Hook\n\nPull request kamu sudah tiga hari terbuka. Setiap pagi kamu `git pull origin main`, menyelesaikan konflik yang sama, dan menunda review karena branch makin jauh dari kenyataan. Di tim yang deploy setiap hari, branch panjang adalah utang: semakin lama hidup, semakin mahal digabungkan.\n\n## Konsep\n\n**GitHub Flow** adalah model minimalis: `main` selalu bisa di-deploy, setiap perubahan masuk lewat branch pendek dan pull request, lalu langsung dirilis setelah review dan CI hijau. Tidak ada branch `develop` atau `release` permanen.\n\n**Trunk-Based Development (TBD)** lebih ketat lagi: semua orang commit ke `main` (trunk) setidaknya sekali sehari, branch hidup kurang dari satu hari, dan fitur yang belum selesai disembunyikan di balik **feature flag**. Perbedaan utamanya bukan command, melainkan disiplin: commit kecil, integrasi terus-menerus, dan pipeline yang cepat.\n\n| Aspek | GitHub Flow | Trunk-Based |\n|---|---|---|\n| Branch utama | `main` | `main` |\n| Umur branch | jam sampai beberapa hari | kurang dari satu hari |\n| Gate | pull request + CI | CI + feature flag |\n| Risiko utama | review menumpuk | `main` sering berubah |\n\nKeduanya menuntut `main` yang sehat. Kalau CI tidak wajib hijau, `main` akan cepat rusak dan seluruh tim berhenti. Karena itu branch protection dan status check wajib bukan opsional.\n\n## Workflow\n\nGitHub Flow untuk fitur checkout:\n\n```bash\ngit switch main\ngit pull --ff-only origin main\ngit switch -c feat/checkout-v2\n# commit kecil, lalu push\ngit add src/checkout\ngit commit -m 'feat(checkout): tambah metode pembayaran'\ngit push -u origin feat/checkout-v2\ngh pr create --fill --base main\n```\n\nSetelah review dan CI hijau, merge lewat GitHub (squash atau merge commit sesuai kebijakan), lalu hapus branch:\n\n```bash\ngit switch main\ngit pull --ff-only origin main\ngit branch -d feat/checkout-v2\n```\n\nDi TBD, sinkronisasi dilakukan dengan rebase agar sejarah tetap lurus:\n\n```bash\ngit pull --rebase origin main\ngit push --force-with-lease\n```\n\n`--force-with-lease` lebih aman daripada `--force`: push ditolak kalau remote sudah bergerak sejak fetch terakhir, sehingga kamu tidak menimpa commit rekan.\n\n**Bahaya yang sering terjadi:** merge ke `main` tanpa menunggu CI, branch fitur yang dibiarkan berminggu-minggu, dan feature flag yang tidak pernah dibersihkan. Flag menumpuk menjadi kondisi tersembunyi yang sulit dites dan akhirnya jadi bug production.\n\n## Praktik\n\nBuat branch `feat/checkout-v2`, commit dengan pesan Conventional Commits, lalu push ke `origin`. Pastikan tidak ada perubahan yang tertinggal di working tree.\n\n## Ringkasan\n\n- GitHub Flow: `main` deployable + branch pendek + PR + CI.\n- TBD: commit harian ke trunk, branch < 1 hari, feature flag untuk fitur belum selesai.\n- Lindungi `main`: CI wajib, review wajib, larang force push.\n\nCheat sheet: `git pull --ff-only` · `git switch -c feat/x` · `gh pr create --fill` · `git pull --rebase` · `git push --force-with-lease`.",
+              "practice_config": {
+                "scenario": "remote",
+                "goal": "Buat branch fitur berumur pendek, commit dengan Conventional Commits, lalu push ke origin.",
+                "commands": [
+                  "git switch -c feat/checkout-v2",
+                  "git add . && git commit -m 'feat(checkout): tambah metode pembayaran'",
+                  "git push -u origin feat/checkout-v2"
+                ],
+                "checks": [
+                  { "type": "branch_exists", "value": "feat/checkout-v2", "label": "Branch fitur dibuat" },
+                  { "type": "remote_branch_exists", "value": "feat/checkout-v2", "remote": "origin", "label": "Branch fitur ada di origin" },
+                  { "type": "commit_message_contains", "value": "feat(checkout)", "label": "Pesan commit memakai Conventional Commits" },
+                  { "type": "clean_worktree", "label": "Tidak ada perubahan tertinggal" }
+                ],
+                "hints": [
+                  "Branch fitur dibuat dari main yang sudah diperbarui.",
+                  "Gunakan pesan commit berpola feat(scope): deskripsi.",
+                  "Push branch baru dengan git push -u origin feat/checkout-v2."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Apa ciri utama GitHub Flow?",
+                  "explanation": "GitHub Flow menjaga main selalu deployable dan mengalirkan setiap perubahan lewat branch pendek serta pull request. Branch develop dan release permanen justru ciri Git Flow.",
+                  "options": [
+                    { "text": "main selalu deployable dan perubahan masuk lewat branch pendek + PR", "correct": true },
+                    { "text": "Selalu ada branch develop dan release permanen", "correct": false },
+                    { "text": "Setiap fitur harus punya branch yang hidup minimal satu bulan", "correct": false },
+                    { "text": "Tidak boleh memakai pull request", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Pada trunk-based development, berapa lama idealnya sebuah branch hidup?",
+                  "explanation": "Branch di TBD sebaiknya hidup kurang dari satu hari agar integrasi sering terjadi dan konflik kecil. Branch berumur mingguan mengembalikan masalah merge besar yang ingin dihindari.",
+                  "options": [
+                    { "text": "Kurang dari satu hari", "correct": true },
+                    { "text": "Satu sampai dua minggu", "correct": false },
+                    { "text": "Sampai seluruh fitur selesai tanpa peduli waktu", "correct": false },
+                    { "text": "Sampai sprint berakhir", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa fungsi feature flag pada trunk-based development?",
+                  "explanation": "Feature flag memungkinkan kode fitur yang belum selesai tetap masuk ke main namun tidak aktif di production. Ini menggantikan branch panjang sebagai cara menyembunyikan pekerjaan.",
+                  "options": [
+                    { "text": "Menyembunyikan fitur yang belum siap tanpa branch panjang", "correct": true },
+                    { "text": "Menggantikan kebutuhan commit", "correct": false },
+                    { "text": "Menghapus riwayat commit secara otomatis", "correct": false },
+                    { "text": "Menandai commit sebagai signed", "correct": false }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "History Rewriting",
+          "description": "Menulis ulang sejarah secara sadar: rebase, interactive rebase, cherry-pick, dan stash, beserta batas amannya.",
+          "order_no": 12,
+          "lessons": [
+            {
+              "slug": "rebase",
+              "title": "Rebase: Sejarah yang Rapi",
+              "estimated_minutes": 10,
+              "order_no": 1,
+              "content_md": "## Hook\n\nBranch `feature/checkout` kamu sudah berisi lima commit bagus, tetapi `main` bergerak sepuluh commit sejak kamu mulai. Kalau di-merge, graph penuh garis silang dan review jadi sulit. Kamu ingin commit fitur terlihat seolah-olah baru ditulis di atas `main` hari ini. Itulah rebase.\n\n## Konsep\n\nMerge menggabungkan dua sejarah dengan commit baru. Rebase **memindahkan** commit: Git mengambil setiap commit di branch kamu, lalu menerapkannya ulang satu per satu di atas base baru. Karena parent berubah, Git membuat commit baru dengan **hash baru**. Commit lama tetap ada di reflog sampai kedaluwarsa, tetapi tidak lagi dijangkau branch.\n\nAnalogi: merge seperti menyambung dua jalan dengan jembatan; rebase seperti membongkar rumah lalu membangunnya kembali di atas fondasi baru. Hasilnya lurus, tetapi nomor rumah (hash) berubah.\n\nKarena hash berubah, **jangan pernah rebase branch yang sudah dipublikasikan dan dipakai orang lain**. Rekanmu akan memiliki commit lama sementara remote berisi commit baru, dan konflik akan berulang. Aturan emas: rebase branch lokal milikmu, merge branch bersama. Rebase juga menyelesaikan konflik per commit, bukan sekaligus, sehingga kesalahan lebih mudah dilacak tetapi prosesnya bisa berulang.\n\n## Workflow\n\n```bash\ngit switch feature/checkout\ngit fetch origin\ngit rebase origin/main\n```\n\nKalau ada konflik, Git berhenti di commit yang bermasalah:\n\n```bash\n# selesaikan konflik di editor\ngit add src/checkout/Cart.jsx\ngit rebase --continue\n\n# atau batalkan seluruh proses\ngit rebase --abort\n```\n\nUntuk memindahkan sebagian commit ke base lain, gunakan `--onto`:\n\n```bash\ngit rebase --onto main old-base feature/checkout\n```\n\nSetelah rebase, push branch yang sudah pernah di-push dengan pengaman:\n\n```bash\ngit push --force-with-lease\n```\n\n`--force-with-lease` menolak push jika remote berubah sejak fetch terakhir. `--force` biasa menimpa apa pun, termasuk commit rekan yang baru masuk.\n\n**Jebakan:** menyelesaikan konflik dengan `git checkout --ours` tanpa membaca isi file. Saat rebase, `ours` adalah base baru dan `theirs` adalah commit kamu, kebalikan dari intuisi merge. Selalu buka file dan pahami kedua sisi.\n\n## Praktik\n\nPindahkan branch `feature/checkout` ke atas `main` terbaru dengan rebase, selesaikan konflik jika muncul, dan pastikan working tree bersih serta tidak ada merge commit tambahan. Bandingkan graph sebelum dan sesudah; hasil akhirnya harus satu garis lurus.\n\n## Ringkasan\n\n- Rebase menulis ulang commit di atas base baru; hash berubah.\n- Rebase hanya untuk branch pribadi, bukan branch bersama.\n- Konflik: perbaiki, `git add`, `git rebase --continue`; batal dengan `--abort`.\n- Push paksa selalu `--force-with-lease`.\n\nCheat sheet: `git rebase origin/main` · `git rebase --continue` · `git rebase --abort` · `git rebase --onto main old-base branch` · `git push --force-with-lease`.",
+              "practice_config": {
+                "scenario": "rebase",
+                "goal": "Pindahkan commit feature/checkout di atas main terbaru tanpa merge commit, lalu pastikan working tree bersih.",
+                "commands": [
+                  "git switch feature/checkout",
+                  "git fetch origin",
+                  "git rebase origin/main",
+                  "git log --oneline --graph"
+                ],
+                "checks": [
+                  { "type": "command_used", "value": "rebase", "label": "Rebase dijalankan" },
+                  { "type": "head_branch", "value": "feature/checkout", "label": "HEAD berada di feature/checkout" },
+                  { "type": "commit_message_contains", "value": "checkout", "label": "Commit fitur tetap ada setelah rebase" },
+                  { "type": "clean_worktree", "label": "Working tree bersih" }
+                ],
+                "hints": [
+                  "Pindah ke branch fitur sebelum memindahkannya.",
+                  "Ambil main terbaru dulu, lalu rebase ke origin/main.",
+                  "Jalankan git rebase origin/main; selesaikan konflik dengan add lalu rebase --continue."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Apa perbedaan utama rebase dibanding merge?",
+                  "explanation": "Rebase menerapkan ulang commit di atas base baru sehingga hash berubah dan sejarah menjadi linear. Merge mempertahankan kedua sejarah dan menambah merge commit.",
+                  "options": [
+                    { "text": "Rebase menulis ulang commit di base baru sehingga hash berubah", "correct": true },
+                    { "text": "Rebase membuat merge commit tambahan", "correct": false },
+                    { "text": "Rebase tidak pernah mengubah sejarah", "correct": false },
+                    { "text": "Rebase hanya bekerja pada file yang belum di-track", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Kenapa branch yang sudah dipakai bersama sebaiknya tidak di-rebase?",
+                  "explanation": "Rebase menghasilkan hash baru, sementara rekan masih memegang commit lama. Akibatnya sejarah bercabang ganda dan konflik berulang. Gunakan merge untuk branch bersama.",
+                  "options": [
+                    { "text": "Hash commit berubah dan rekan masih memegang commit lama", "correct": true },
+                    { "text": "Rebase menghapus branch lain secara permanen", "correct": false },
+                    { "text": "Rebase tidak bisa dijalankan jika ada remote", "correct": false },
+                    { "text": "Rebase selalu menghapus file yang tidak di-commit", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Saat rebase berhenti karena konflik, apa langkah yang benar setelah memperbaiki file?",
+                  "explanation": "Setelah konflik diselesaikan, stage file dengan git add lalu lanjutkan dengan git rebase --continue. Menjalankan git commit sembarangan dapat membuat commit ganda atau menghentikan proses dengan state aneh.",
+                  "options": [
+                    { "text": "git add lalu git rebase --continue", "correct": true },
+                    { "text": "git add lalu git commit -m 'fix conflict'", "correct": false },
+                    { "text": "git rebase --skip tanpa memeriksa file", "correct": false },
+                    { "text": "git reset --hard lalu ulangi dari awal", "correct": false }
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "interactive-rebase-cherry-pick-stash",
+              "title": "Interactive Rebase, Cherry-pick & Stash",
+              "estimated_minutes": 11,
+              "order_no": 2,
+              "content_md": "## Hook\n\nTiga hal menghadang sebelum PR kamu siap: commit `wip`, `fix typo`, dan `debug console` yang berantakan; satu perbaikan hotfix di branch lain yang kamu butuhkan sekarang; dan perubahan setengah jadi yang belum layak di-commit tetapi harus kamu simpan karena ada permintaan mendesak. Tiga tool berikut menyelesaikan ketiganya tanpa meninggalkan kekacauan.\n\n## Konsep\n\n**Interactive rebase** membuka daftar commit di editor dan membiarkan kamu menentukan nasib masing-masing:\n\n- `pick` — pakai commit apa adanya.\n- `reword` — ubah pesan commit.\n- `edit` — hentikan rebase untuk mengubah isi commit.\n- `squash` — gabungkan dengan commit sebelumnya dan buka editor untuk pesan gabungan.\n- `fixup` — gabungkan dengan commit sebelumnya, buang pesannya.\n- `drop` — hapus commit.\n\n**Cherry-pick** menyalin satu commit tertentu ke branch aktif. Ini berguna untuk hotfix yang harus masuk ke dua branch, tetapi menghasilkan hash baru. Kalau commit yang sama nanti di-merge dari branch asalnya, Git bisa menganggapnya duplikat dan memunculkan konflik yang membingungkan.\n\n**Stash** menyimpan perubahan working directory dan staging ke tumpukan sementara, lalu mengembalikan working tree bersih. `stash pop` menerapkan dan menghapus entri jika berhasil; `stash apply` menerapkan tetapi mempertahankan entri. `stash push -u` ikut menyimpan file untracked. Stash bersifat lokal dan tidak ikut ter-push, jadi jangan dipakai sebagai satu-satunya cadangan pekerjaan penting.\n\n## Workflow\n\nMerapikan tiga commit terakhir:\n\n```bash\ngit rebase -i HEAD~3\n# pick   a1b2c3d feat: form checkout\n# squash d4e5f6a wip\n# reword 7788990 fix typo\n```\n\nMengambil hotfix dari branch lain:\n\n```bash\ngit switch release/1.4.0\ngit cherry-pick 9f8e7d6\ngit log --oneline -3\n```\n\nMenyimpan pekerjaan sebelum pindah tugas:\n\n```bash\ngit stash push -u -m 'wip filter produk'\ngit stash list\ngit switch main\ngit stash pop\n```\n\n**Bahaya:** `rebase -i` pada commit yang sudah di-push akan mengubah hash dan memaksa force push. `stash pop` bisa menghasilkan konflik jika file yang sama berubah sejak stash dibuat; kalau ragu, pakai `apply` dulu agar entri tidak hilang. Jangan pernah menganggap stash sebagai backup permanen — tumpukan ini mudah terlupakan dan tidak ikut ter-push.\n\n## Praktik\n\nSimpan perubahan setengah jadi dengan stash, ambil commit hotfix dari branch lain memakai cherry-pick, lalu pulihkan stash dan commit pekerjaanmu. Periksa `git stash list` dan `git log` untuk memastikan urutan commit benar.\n\n## Ringkasan\n\n- `rebase -i` untuk pick, reword, edit, squash, fixup, drop.\n- `cherry-pick` menyalin commit dengan hash baru; waspadai duplikasi.\n- `stash push/pop/apply/list`; `pop` menghapus entri, `apply` mempertahankan.\n\nCheat sheet: `git rebase -i HEAD~3` · `git cherry-pick <sha>` · `git stash push -u -m 'wip'` · `git stash list` · `git stash pop` · `git stash apply`.",
+              "practice_config": {
+                "scenario": "rebase",
+                "goal": "Stash pekerjaan yang belum selesai, cherry-pick commit hotfix, lalu pulihkan stash dan commit perubahanmu.",
+                "commands": [
+                  "git stash push -m 'wip filter produk'",
+                  "git cherry-pick <sha-hotfix>",
+                  "git stash pop",
+                  "git add . && git commit -m 'feat: filter produk'"
+                ],
+                "checks": [
+                  { "type": "command_used", "value": "cherry-pick", "label": "Cherry-pick dijalankan" },
+                  { "type": "commit_message_contains", "value": "filter", "label": "Pekerjaan yang dipulihkan ter-commit" },
+                  { "type": "command_used", "value": "stash", "label": "Perubahan disimpan dengan stash" },
+                  { "type": "clean_worktree", "label": "Working tree bersih di akhir" }
+                ],
+                "hints": [
+                  "Amankan pekerjaan yang belum selesai sebelum berpindah konteks.",
+                  "Gunakan git cherry-pick dengan hash commit hotfix dari branch lain.",
+                  "Setelah git stash pop, stage dan commit perubahan agar working tree bersih."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Apa perbedaan squash dan fixup pada interactive rebase?",
+                  "explanation": "Squash menggabungkan commit dan membuka editor agar pesan gabungan bisa dirapikan; fixup menggabungkan tanpa memakai pesan commit tersebut. Keduanya menghasilkan satu commit, tetapi perlakuan pesannya berbeda.",
+                  "options": [
+                    { "text": "Squash membuka editor pesan gabungan, fixup membuang pesan commit itu", "correct": true },
+                    { "text": "Squash menghapus commit, fixup mempertahankannya", "correct": false },
+                    { "text": "Fixup hanya bekerja pada commit pertama", "correct": false },
+                    { "text": "Keduanya membuat merge commit baru", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa yang dilakukan git cherry-pick 9f8e7d6?",
+                  "explanation": "Cherry-pick menerapkan perubahan commit 9f8e7d6 ke branch aktif sebagai commit baru dengan hash baru. Commit asal di branch lain tidak berubah.",
+                  "options": [
+                    { "text": "Menyalin perubahan commit tersebut ke branch aktif sebagai commit baru", "correct": true },
+                    { "text": "Memindahkan branch aktif ke commit tersebut", "correct": false },
+                    { "text": "Menghapus commit tersebut dari branch asal", "correct": false },
+                    { "text": "Menggabungkan seluruh branch asal", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa beda git stash pop dan git stash apply?",
+                  "explanation": "Pop menerapkan lalu menghapus entri stash jika berhasil, sedangkan apply menerapkan tetapi mempertahankan entri. Apply lebih aman saat kamu ingin cadangan sebelum menyelesaikan konflik.",
+                  "options": [
+                    { "text": "Pop menghapus entri stash setelah diterapkan, apply mempertahankannya", "correct": true },
+                    { "text": "Pop hanya untuk file untracked, apply untuk file tracked", "correct": false },
+                    { "text": "Apply menghapus entri, pop mempertahankannya", "correct": false },
+                    { "text": "Keduanya selalu menghapus entri stash", "correct": false }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Debugging dengan Git",
+          "description": "Menemukan commit penyebab bug dan menyelamatkan pekerjaan yang tampak hilang, tanpa menebak-nebak.",
+          "order_no": 13,
+          "lessons": [
+            {
+              "slug": "reflog",
+              "title": "Reflog: Penyelamat Commit Hilang",
+              "estimated_minutes": 9,
+              "order_no": 1,
+              "content_md": "## Hook\n\nKamu mencoba sesuatu, tidak cocok, lalu menjalankan `git reset --hard HEAD~2`. Dua detik kemudian kamu sadar commit fitur dua jam terakhir ikut lenyap dan branch terlihat seperti kemarin. Sebelum menulis ulang semuanya, ada satu tempat yang hampir selalu bisa menyelamatkanmu: reflog.\n\n## Konsep\n\nReflog adalah jurnal lokal yang mencatat setiap pergerakan HEAD dan ref: commit, checkout, reset, merge, rebase, cherry-pick, dan pull. Setiap entri punya alamat relatif seperti `HEAD@{0}` (paling baru), `HEAD@{1}` (sebelumnya), atau `main@{3}`.\n\nPenting dipahami: reflog **bukan** riwayat commit dan tidak ikut ter-push. Ia hanya ada di clone lokalmu. Semakin cepat kamu memeriksa reflog setelah kesalahan, semakin kecil kemungkinan entri yang dibutuhkan sudah terhapus oleh garbage collection. Entri reflog juga bisa kedaluwarsa — default 90 hari untuk entri yang masih dijangkau dan 30 hari untuk commit yang sudah tidak dijangkau — jadi jangan menunda pemulihan.\n\nReflog menyelamatkan commit yang pernah dibuat. Ia **tidak** menyelamatkan perubahan yang belum pernah di-commit: `reset --hard` menghapus isi working directory, dan tidak ada yang bisa dipulihkan dari reflog. Itu sebabnya commit kecil dan sering lebih aman daripada menyimpan pekerjaan berjam-jam tanpa commit.\n\n## Workflow\n\nLihat jurnal dan temukan posisi sebelum kesalahan:\n\n```bash\ngit reflog\ngit show HEAD@{1} --stat\ngit show HEAD@{4}:src/checkout/Cart.jsx\n```\n\nPulihkan branch ke commit tersebut:\n\n```bash\ngit reset --hard HEAD@{1}\n```\n\nCara yang lebih aman adalah membuat branch baru, sehingga commit lama tetap terjangkau dan mudah dibandingkan:\n\n```bash\ngit switch -c rescue/checkout HEAD@{4}\ngit log --oneline --graph -5\n```\n\nKalau butuh melihat pergerakan branch tertentu, bukan HEAD:\n\n```bash\ngit reflog show main\ngit diff main@{1} main\n```\n\n**Bahaya:** jangan pernah menjalankan `git reflog expire --expire=now --all` atau `git gc --prune=now` hanya untuk membersihkan repo. Perintah itu menghapus jaring pengaman terakhirmu. `reset --hard` juga bukan undo universal: ia membuang perubahan lokal tanpa konfirmasi, termasuk file yang belum di-track jika kamu menambahkan `git clean -fd`.\n\n## Praktik\n\nSimulasikan commit yang hilang: reset branch satu commit ke belakang, buktikan commit masih ada di reflog, lalu kembalikan branch ke posisi semula. Bandingkan hash sebelum dan sesudah pemulihan untuk memastikan commit yang kembali benar.\n\n## Ringkasan\n\n- Reflog mencatat pergerakan HEAD/ref secara lokal.\n- Alamat entri: `HEAD@{0}`, `HEAD@{1}`, `main@{2}`.\n- Pulihkan dengan `reset --hard HEAD@{n}` atau buat branch penyelamat.\n- Reflog tidak menyelamatkan perubahan yang belum di-commit dan tidak ada di remote.\n\nCheat sheet: `git reflog` · `git reflog show main` · `git show HEAD@{2}` · `git reset --hard HEAD@{1}` · `git switch -c rescue/x HEAD@{4}`.",
+              "practice_config": {
+                "scenario": "history",
+                "goal": "Setelah reset --hard menghilangkan commit terakhir, temukan posisinya di reflog dan kembalikan branch ke commit tersebut.",
+                "commands": [
+                  "git reset --hard HEAD~1",
+                  "git reflog",
+                  "git reset --hard HEAD@{1}"
+                ],
+                "checks": [
+                  { "type": "reflog_contains", "value": "reset", "label": "Reflog mencatat operasi reset" },
+                  { "type": "commit_count", "value": 2, "label": "Commit yang hilang sudah kembali" },
+                  { "type": "head_branch", "value": "main", "label": "HEAD kembali di branch main" },
+                  { "type": "clean_worktree", "label": "Working tree bersih" }
+                ],
+                "hints": [
+                  "Jangan panik dan jangan commit apa pun dulu.",
+                  "git reflog menampilkan posisi HEAD sebelum reset.",
+                  "Kembalikan dengan git reset --hard HEAD@{1}, sesuaikan nomornya dengan output reflog."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Apa yang dicatat oleh git reflog?",
+                  "explanation": "Reflog mencatat pergerakan HEAD dan ref lokal seperti checkout, reset, merge, dan rebase. Ia bukan daftar commit dan tidak otomatis ada di remote.",
+                  "options": [
+                    { "text": "Pergerakan HEAD dan ref lokal dari waktu ke waktu", "correct": true },
+                    { "text": "Seluruh commit dari semua remote", "correct": false },
+                    { "text": "Isi file yang belum pernah di-commit", "correct": false },
+                    { "text": "Daftar branch yang sudah dihapus permanen di server", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Commit hilang setelah git reset --hard HEAD~1. Cara paling tepat memulihkannya?",
+                  "explanation": "Cari posisi sebelum reset di reflog, lalu kembalikan branch ke sana dengan git reset --hard HEAD@{1}. Nomor entri harus disesuaikan dengan output reflog, bukan ditebak.",
+                  "options": [
+                    { "text": "Lihat git reflog lalu git reset --hard HEAD@{1}", "correct": true },
+                    { "text": "Jalankan git pull untuk mengambil commit yang hilang", "correct": false },
+                    { "text": "Jalankan git commit --amend", "correct": false },
+                    { "text": "Hapus repository lalu clone ulang", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa yang TIDAK bisa diselamatkan oleh reflog?",
+                  "explanation": "Reflog hanya menyimpan commit yang pernah ada. Perubahan working directory yang belum pernah di-commit dan terhapus oleh reset --hard tidak memiliki objek Git untuk dipulihkan.",
+                  "options": [
+                    { "text": "Perubahan yang belum pernah di-commit dan terhapus reset --hard", "correct": true },
+                    { "text": "Commit yang tidak lagi dijangkau branch setelah reset", "correct": false },
+                    { "text": "Commit dari rebase yang dibatalkan", "correct": false },
+                    { "text": "Posisi HEAD sebelum checkout", "correct": false }
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "bisect-dan-blame",
+              "title": "Bisect & Blame",
+              "estimated_minutes": 11,
+              "order_no": 2,
+              "content_md": "## Hook\n\nBug total pembayaran muncul di production, tetapi tidak ada yang tahu commit mana penyebabnya. Ada 300 commit sejak rilis terakhir yang diketahui baik. Membaca satu per satu tidak realistis, dan menebak lewat nama commit sering salah. Git punya dua alat untuk menjawab pertanyaan berbeda: **bisect** mencari commit penyebab, **blame** mencari baris dan commit terakhir yang menyentuhnya.\n\n## Konsep\n\n**Bisect** adalah binary search di atas sejarah. Kamu menandai satu commit `bad` (sekarang rusak) dan satu `good` (terakhir diketahui sehat). Git checkout commit di tengah, kamu uji, lalu tandai hasilnya. Ruang pencarian terbelah dua setiap langkah: 300 commit selesai dalam sekitar 8–9 pengujian.\n\nBisect bekerja paling baik jika pengujiannya otomatis. `git bisect run` menjalankan script di setiap titik: exit code `0` dianggap good, non-zero dianggap bad, dan `125` berarti skip. Pastikan script benar-benar menguji bug, bukan sekadar berhasil dijalankan.\n\n**Blame** menampilkan commit terakhir yang mengubah setiap baris. Ini bukan alat mencari \"siapa yang salah\", melainkan konteks: siapa menulis baris ini, di commit apa, dan kenapa. Gunakan `-L 40,60` untuk membatasi rentang baris, `-w` untuk mengabaikan perubahan spasi, dan `-C` untuk mendeteksi kode yang dipindahkan dari file lain.\n\nKeterbatasan blame: commit yang terlihat bisa jadi hanya commit formatting atau rename. Karena itu cocokkan dengan `git log -S 'namaFungsi'` (pickaxe) untuk menemukan commit yang menambah atau menghapus sebuah string, lalu baca `git show`-nya.\n\n## Workflow\n\nBisect manual:\n\n```bash\ngit bisect start\ngit bisect bad\ngit bisect good v1.3.0\n# Git checkout commit tengah, uji bug-nya\ngit bisect good   # atau git bisect bad\ngit bisect reset\n```\n\nBisect otomatis dengan test suite:\n\n```bash\ngit bisect start HEAD v1.3.0\ngit bisect run npm test -- --run src/checkout\n```\n\nBlame dan pelacakan baris:\n\n```bash\ngit blame -L 40,60 -w src/checkout/Cart.jsx\ngit log -S 'calculateTotal' --oneline -- src/checkout/Cart.jsx\ngit show 9f8e7d6 -- src/checkout/Cart.jsx\n```\n\n**Jebakan:** lupa `git bisect reset` membuat repo tertinggal dalam detached HEAD dan membingungkan langkah berikutnya. `git bisect run` juga bisa menyesatkan jika test flaky — hasil good/bad acak menghasilkan kesimpulan salah. Pastikan working tree bersih sebelum mulai, dan gunakan `git bisect skip` untuk commit yang tidak bisa diuji.\n\n## Praktik\n\nGunakan bisect untuk mempersempit commit penyebab, lalu gunakan blame pada rentang baris yang dicurigai untuk melihat commit terakhir yang mengubahnya. Akhiri dengan `git bisect reset`.\n\n## Ringkasan\n\n- Bisect = binary search: `start`, `bad`, `good`, `run`, `reset`.\n- `git bisect run` butuh exit code yang benar; skip dengan 125.\n- Blame menunjukkan commit terakhir per baris, bukan penyebab logis.\n- Kombinasikan blame dengan `git log -S` dan `git show`.\n\nCheat sheet: `git bisect start` · `git bisect bad` · `git bisect good v1.3.0` · `git bisect run npm test` · `git bisect reset` · `git blame -L 40,60 file` · `git log -S 'teks'`.",
+              "practice_config": {
+                "scenario": "history",
+                "goal": "Jalankan bisect untuk mencari commit bermasalah, periksa baris terkait dengan blame, lalu akhiri sesi bisect.",
+                "commands": [
+                  "git bisect start",
+                  "git bisect bad",
+                  "git bisect good HEAD~3",
+                  "git blame -L 1,10 src/app.js"
+                ],
+                "checks": [
+                  { "type": "command_used", "value": "bisect start", "label": "Sesi bisect dimulai" },
+                  { "type": "command_used", "value": "bisect good", "label": "Commit good ditandai" },
+                  { "type": "command_used", "value": "blame", "label": "Blame dipakai pada rentang baris" },
+                  { "type": "clean_worktree", "label": "Working tree bersih" }
+                ],
+                "hints": [
+                  "Tandai dulu kondisi sekarang sebagai bad.",
+                  "Butuh satu commit lama yang kamu yakini masih baik.",
+                  "Blame dengan -L membatasi pemeriksaan pada baris tertentu."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Pada git bisect, apa arti menandai sebuah commit sebagai bad?",
+                  "explanation": "Bad berarti bug masih ada pada commit tersebut. Good berarti bug tidak ada. Bisect memakai dua batas ini untuk memilih commit tengah berikutnya.",
+                  "options": [
+                    { "text": "Bug masih ada pada commit itu", "correct": true },
+                    { "text": "Commit itu gagal di-build karena konfigurasi", "correct": false },
+                    { "text": "Commit itu belum di-push ke remote", "correct": false },
+                    { "text": "Commit itu ditulis oleh kontributor baru", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Bagaimana git bisect run menentukan sebuah commit good atau bad?",
+                  "explanation": "Script dijalankan di setiap commit; exit code 0 dianggap good, non-zero dianggap bad, dan 125 berarti skip. Karena itu script harus benar-benar menguji bug.",
+                  "options": [
+                    { "text": "Dari exit code: 0 good, non-zero bad, 125 skip", "correct": true },
+                    { "text": "Dari isi pesan commit", "correct": false },
+                    { "text": "Dari jumlah file yang berubah", "correct": false },
+                    { "text": "Dari nama branch saat ini", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa yang ditunjukkan oleh git blame -L 40,60 src/Cart.jsx?",
+                  "explanation": "Blame menampilkan commit terakhir yang mengubah tiap baris pada rentang 40 sampai 60. Ia tidak otomatis menunjukkan commit yang menyebabkan bug secara logis.",
+                  "options": [
+                    { "text": "Commit terakhir yang mengubah baris 40–60 pada file tersebut", "correct": true },
+                    { "text": "Semua commit yang pernah menyentuh file itu", "correct": false },
+                    { "text": "Daftar bug pada baris 40–60", "correct": false },
+                    { "text": "Perbedaan file antara dua branch", "correct": false }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Release",
+          "description": "Menandai versi yang dirilis dan mengomunikasikan perubahannya lewat tag, semantic versioning, dan GitHub Releases.",
+          "order_no": 14,
+          "lessons": [
+            {
+              "slug": "tag-dan-semver",
+              "title": "Tag & Semantic Versioning",
+              "estimated_minutes": 9,
+              "order_no": 1,
+              "content_md": "## Hook\n\nJumat malam kamu deploy. Dua minggu kemudian muncul pertanyaan sederhana: \"Commit mana yang sedang jalan di production, dan versi berapa itu?\" Kamu membuka `git log`, melihat ratusan commit, dan tidak bisa menjawab dengan yakin. Tag menyelesaikan masalah ini dalam satu perintah.\n\n## Konsep\n\nTag adalah label permanen yang menunjuk ke satu commit. Ada dua jenis:\n\n- **Lightweight** (`git tag v1.4.0`) — hanya pointer, tanpa metadata tambahan.\n- **Annotated** (`git tag -a v1.4.0 -m '...'`) — menyimpan pembuat tag, tanggal, dan pesan; bisa ditandatangani dengan `-s`. Untuk rilis, selalu gunakan annotated.\n\n**Semantic Versioning** memakai format `MAJOR.MINOR.PATCH`, misalnya `2.4.1`:\n\n- **MAJOR** naik saat ada perubahan yang merusak kompatibilitas (breaking change).\n- **MINOR** naik saat menambah fitur yang tetap backward compatible.\n- **PATCH** naik untuk bugfix yang backward compatible.\n\nVersi pra-rilis ditulis `2.0.0-rc.1`, dan build metadata `2.0.0+build.7` tidak memengaruhi prioritas versi. Selama masih `0.y.z`, API dianggap belum stabil dan boleh berubah. Untuk pustaka Go, tag `v1.4.0` di root repository juga menentukan nama modul yang diambil `go get`. Kompatibilitas berarti kode yang memakai versi lama tidak perlu diubah saat upgrade.\n\n## Workflow\n\nBuat annotated tag pada commit yang benar:\n\n```bash\ngit switch main\ngit pull --ff-only origin main\ngit log --oneline -3\ngit tag -a v1.4.0 -m 'Release 1.4.0: checkout v2 dan perbaikan pembayaran'\ngit show v1.4.0\n```\n\nPush tag secara eksplisit — `git push` biasa tidak mengirim tag:\n\n```bash\ngit push origin v1.4.0\n# atau semua tag sekaligus\ngit push origin --tags\ngit describe --tags --abbrev=0\n```\n\nMenghapus tag yang belum dipublikasikan:\n\n```bash\ngit tag -d v1.4.0\ngit push origin :refs/tags/v1.4.0   # hanya jika memang perlu dan sudah dikoordinasikan\n```\n\n**Bahaya:** tag rilis yang sudah dipublikasikan sebaiknya dianggap abadi. Memindahkan atau menghapusnya merusak cache, checksum unduhan, dan resolusi dependency. Kalau ada kesalahan, terbitkan versi patch baru (`1.4.1`), jangan menggeser `1.4.0`. Jangan juga memberi tag pada commit yang belum diuji hanya karena \"nanti diperbaiki\".\n\n## Praktik\n\nBuat annotated tag `v1.4.0` di branch `main` dengan pesan rilis yang jelas, lalu verifikasi tag menunjuk ke commit terbaru. Catat tanggal dan commit di catatan rilis agar tim support mudah menelusuri.\n\n## Ringkasan\n\n- Lightweight = pointer; annotated = metadata + pesan, wajib untuk rilis.\n- Semver: breaking → MAJOR, fitur → MINOR, bugfix → PATCH.\n- `git push origin v1.4.0`; push biasa tidak mengirim tag.\n- Tag publik bersifat immutable.\n\nCheat sheet: `git tag -a v1.4.0 -m '...'` · `git show v1.4.0` · `git push origin v1.4.0` · `git push origin --tags` · `git describe --tags` · `git tag -d v1.4.0`.",
+              "practice_config": {
+                "scenario": "basic",
+                "goal": "Buat annotated tag v1.4.0 pada commit terbaru di main dan pastikan working tree bersih.",
+                "commands": [
+                  "git switch main",
+                  "git tag -a v1.4.0 -m 'Release 1.4.0'",
+                  "git show v1.4.0"
+                ],
+                "checks": [
+                  { "type": "tag_exists", "value": "v1.4.0", "label": "Tag v1.4.0 tersedia" },
+                  { "type": "command_used", "value": "tag -a", "label": "Tag dibuat sebagai annotated tag" },
+                  { "type": "head_branch", "value": "main", "label": "Tag dibuat dari main" },
+                  { "type": "clean_worktree", "label": "Tidak ada perubahan tertinggal" }
+                ],
+                "hints": [
+                  "Pastikan berada di commit yang benar sebelum memberi tag.",
+                  "Gunakan -a agar tag menyimpan pesan dan metadata.",
+                  "Verifikasi dengan git show v1.4.0."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Versi sekarang 2.3.0. Kamu menambah fitur baru yang tetap backward compatible. Versi berikutnya?",
+                  "explanation": "Fitur baru yang tidak merusak kompatibilitas menaikkan MINOR menjadi 2.4.0. PATCH hanya untuk bugfix, dan MAJOR untuk breaking change.",
+                  "options": [
+                    { "text": "2.4.0", "correct": true },
+                    { "text": "2.3.1", "correct": false },
+                    { "text": "3.0.0", "correct": false },
+                    { "text": "2.3.0-beta", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Kenapa annotated tag lebih disarankan untuk rilis?",
+                  "explanation": "Annotated tag menyimpan pembuat, tanggal, dan pesan, serta bisa ditandatangani. Lightweight hanya pointer tanpa metadata sehingga kurang informatif untuk audit rilis.",
+                  "options": [
+                    { "text": "Menyimpan metadata dan pesan, serta bisa ditandatangani", "correct": true },
+                    { "text": "Otomatis mengunggah kode ke production", "correct": false },
+                    { "text": "Membuat branch baru di remote", "correct": false },
+                    { "text": "Menghapus commit lama setelah dirilis", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Perintah mana yang mengirim satu tag v1.4.0 ke origin?",
+                  "explanation": "git push biasa tidak mengirim tag. Gunakan git push origin v1.4.0, atau git push origin --tags untuk semua tag. Nama tag harus disebut eksplisit.",
+                  "options": [
+                    { "text": "git push origin v1.4.0", "correct": true },
+                    { "text": "git push", "correct": false },
+                    { "text": "git tag --push", "correct": false },
+                    { "text": "git commit --tag v1.4.0", "correct": false }
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "github-releases",
+              "title": "GitHub Releases & Changelog",
+              "estimated_minutes": 8,
+              "order_no": 2,
+              "content_md": "## Hook\n\nTag `v1.4.0` sudah ada, tetapi halaman release kosong dan changelog selalu ditulis manual di menit terakhir. QA bertanya apa saja yang berubah, tim frontend bertanya apakah ada breaking change, dan pengguna hanya melihat daftar commit mentah. Release notes yang baik menjawab pertanyaan itu sebelum ditanyakan.\n\n## Konsep\n\n**GitHub Release** adalah tag yang diberi judul, catatan rilis, dan aset opsional (binary, checksum, source archive). Release selalu terikat pada tag; tanpa tag, tidak ada release. Release bisa berstatus draft, prerelease, atau latest.\n\n**Changelog** adalah dokumen yang ditujukan untuk manusia, bukan dump commit. Jika tim memakai **Conventional Commits** (`feat:`, `fix:`, `chore:`, `feat!:`), changelog bisa dikelompokkan otomatis:\n\n| Prefix | Kategori changelog |\n|---|---|\n| `feat` | Added |\n| `fix` | Fixed |\n| `perf` | Changed |\n| `refactor` | Changed |\n| `feat!` / `BREAKING CHANGE` | Breaking |\n\nStruktur yang lazim dipakai adalah Keep a Changelog: Added, Changed, Deprecated, Removed, Fixed, Security. Tulis dari sudut pandang pengguna: \"Checkout sekarang mendukung pembayaran QRIS\", bukan \"refactor cart service\". Release notes yang baik menyebut dampak bagi pengguna, langkah migrasi, dan tautan ke issue terkait.\n\n## Workflow\n\nBuat release dari tag yang sudah di-push:\n\n```bash\ngit push origin v1.4.0\ngh release create v1.4.0 \\\n  --title 'v1.4.0 — Checkout v2' \\\n  --generate-notes\ngh release view v1.4.0\n```\n\nUntuk kandidat rilis, tandai sebagai prerelease agar tidak dianggap latest:\n\n```bash\ngh release create v1.5.0-rc.1 --prerelease --generate-notes\n```\n\nMelampirkan artefak build:\n\n```bash\ngh release upload v1.4.0 dist/app-linux-amd64 dist/checksums.txt\n```\n\nAlternatif di GitHub Actions, jalankan saat tag `v*` masuk:\n\n```yaml\non:\n  push:\n    tags: ['v*']\n```\n\n**Bahaya:** `--generate-notes` hanya merangkum PR dan commit; ia tidak tahu mana perubahan yang benar-benar penting. Selalu edit hasilnya. Jangan menulis klaim \"breaking change\" tanpa instruksi migrasi, dan jangan menghapus tag yang sudah punya release — release bisa menggantung atau hilang dari halaman. Untuk rilis berjadwal, gunakan tool seperti release-please atau changesets agar changelog dan versi konsisten.\n\n## Praktik\n\nBuat tag `v1.4.0`, push tag tersebut, lalu buat GitHub Release dengan catatan yang dihasilkan otomatis. Setelah dibuat, buka halaman release dan koreksi pengelompokan yang keliru sebelum diumumkan. Pastikan working tree bersih.\n\n## Ringkasan\n\n- Release = tag + judul + notes + aset.\n- Conventional Commits memudahkan pengelompokan changelog.\n- Tandai prerelease dengan `--prerelease`, draft dengan `--draft`.\n- Review hasil `--generate-notes`; jangan publikasikan mentah-mentah.\n\nCheat sheet: `gh release create v1.4.0 --generate-notes` · `gh release view v1.4.0` · `gh release upload` · `gh release create --prerelease` · `git push origin v1.4.0`.",
+              "practice_config": {
+                "scenario": "remote",
+                "goal": "Buat tag v1.4.0, push ke origin, lalu terbitkan GitHub Release dengan catatan otomatis.",
+                "commands": [
+                  "git tag -a v1.4.0 -m 'Release 1.4.0'",
+                  "git push origin v1.4.0",
+                  "gh release create v1.4.0 --title 'v1.4.0' --generate-notes"
+                ],
+                "checks": [
+                  { "type": "tag_exists", "value": "v1.4.0", "label": "Tag v1.4.0 dibuat" },
+                  { "type": "command_used", "value": "push origin v1.4.0", "label": "Tag dikirim ke origin" },
+                  { "type": "command_used", "value": "release create", "label": "GitHub Release dibuat" },
+                  { "type": "clean_worktree", "label": "Working tree bersih" }
+                ],
+                "hints": [
+                  "Release butuh tag yang sudah ada.",
+                  "Push tag secara eksplisit sebelum membuat release.",
+                  "Gunakan gh release create dengan --generate-notes."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "GitHub Release selalu terikat pada apa?",
+                  "explanation": "Release dibuat di atas sebuah tag dan menunjuk ke commit tag tersebut. Tanpa tag, GitHub tidak bisa membuat release.",
+                  "options": [
+                    { "text": "Sebuah tag", "correct": true },
+                    { "text": "Sebuah issue", "correct": false },
+                    { "text": "Branch default saja", "correct": false },
+                    { "text": "Pull request yang sudah di-merge", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Commit dengan prefix feat: paling tepat masuk kategori changelog apa?",
+                  "explanation": "feat menandai fitur baru sehingga masuk kategori Added. fix masuk Fixed, sedangkan breaking change perlu bagian khusus beserta instruksi migrasi.",
+                  "options": [
+                    { "text": "Added", "correct": true },
+                    { "text": "Fixed", "correct": false },
+                    { "text": "Security", "correct": false },
+                    { "text": "Removed", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa efek flag --prerelease pada gh release create?",
+                  "explanation": "Flag ini menandai release sebagai pra-rilis sehingga tidak dianggap latest. Ini cocok untuk rc atau beta yang belum siap dipakai semua pengguna.",
+                  "options": [
+                    { "text": "Release ditandai pra-rilis dan tidak menjadi latest", "correct": true },
+                    { "text": "Tag dihapus setelah release dibuat", "correct": false },
+                    { "text": "Release otomatis di-merge ke main", "correct": false },
+                    { "text": "Catatan rilis disembunyikan dari publik", "correct": false }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Otomasi",
+          "description": "Memindahkan pengecekan rutin dari ingatan manusia ke hook lokal dan pipeline CI yang berjalan di setiap perubahan.",
+          "order_no": 15,
+          "lessons": [
+            {
+              "slug": "git-hooks",
+              "title": "Git Hooks",
+              "estimated_minutes": 9,
+              "order_no": 1,
+              "content_md": "## Hook\n\nKamu push commit yang ternyata lupa diformat, dan empat menit kemudian CI merah. Lebih parah lagi, sebuah file `.env` ikut masuk karena tidak ada yang memeriksa sebelum commit. Git hooks bisa menangkap masalah ini di laptopmu, sebelum commit meninggalkan mesin.\n\n## Konsep\n\nHook adalah script yang dijalankan Git pada momen tertentu. Yang paling sering dipakai:\n\n- `pre-commit` — sebelum commit dibuat; cocok untuk lint, format, dan cek file terlarang.\n- `commit-msg` — memvalidasi pesan commit (misalnya Conventional Commits via commitlint).\n- `pre-push` — sebelum push; cocok untuk test yang lebih berat.\n- `post-merge` — setelah merge, misalnya memasang dependency baru.\n\nSecara default hook berada di `.git/hooks/`. Direktori itu **tidak ikut ter-commit dan tidak ikut ter-clone**, jadi hook yang kamu tulis tidak otomatis dimiliki rekan tim. File hook juga harus executable (`chmod +x`).\n\nAda dua cara membagikannya:\n\n1. Simpan hook di folder repo seperti `.githooks/`, lalu jalankan `git config core.hooksPath .githooks`.\n2. Pakai tool seperti Husky atau Lefthook yang mengelola instalasi dan path secara otomatis.\n\nHook bersifat lokal dan bisa dilewati dengan `git commit --no-verify`. Hook juga berjalan di direktori kerja masing-masing, sehingga perilakunya bisa berbeda antar-OS dan antar-versi Node atau Go. Karena itu hook adalah alat kenyamanan, bukan penegakan. CI tetap harus menjadi sumber kebenaran.\n\n## Workflow\n\n```bash\nmkdir -p .githooks\n```\n\nIsi `.githooks/pre-commit`:\n\n```sh\n#!/bin/sh\nset -e\nnpx lint-staged\ngit diff --cached --name-only | grep -E '^\\.env$' && {\n  echo 'File .env tidak boleh di-commit'\n  exit 1\n}\n```\n\nAktifkan dan uji:\n\n```bash\nchmod +x .githooks/pre-commit\ngit config core.hooksPath .githooks\ngit add .\ngit commit -m 'chore: tambah pre-commit hook'\n```\n\nValidasi pesan commit dengan `commit-msg`:\n\n```sh\n#!/bin/sh\nnpx --no -- commitlint --edit \"$1\"\n```\n\n**Bahaya:** hook yang terlalu lambat membuat orang terbiasa memakai `--no-verify`, sehingga nilainya hilang. Hook juga menjalankan kode arbitrer dari repository; saat membuka repo asing, periksa dulu apakah ada `core.hooksPath` yang mencurigakan. Jangan menaruh secret atau kredensial di dalam script hook karena file itu ikut ter-commit.\n\n## Praktik\n\nBuat folder `.githooks`, tambahkan `pre-commit` sederhana, set `core.hooksPath`, lalu commit konfigurasi tersebut. Uji hook dengan sengaja membuat commit yang melanggar aturan, lalu pastikan commit ditolak. Pastikan working tree bersih.\n\n## Ringkasan\n\n- Hook default ada di `.git/hooks`, tidak versioned, harus executable.\n- Bagikan lewat `core.hooksPath` atau Husky/Lefthook.\n- `pre-commit` untuk lint cepat, `commit-msg` untuk format pesan, `pre-push` untuk test.\n- `--no-verify` bisa melewati hook; CI tetap wajib.\n\nCheat sheet: `git config core.hooksPath .githooks` · `chmod +x .githooks/pre-commit` · `git commit --no-verify` (hindari) · `npx lint-staged` · `npx commitlint --edit`.",
+              "practice_config": {
+                "scenario": "basic",
+                "goal": "Siapkan hook pre-commit yang dibagikan lewat folder .githooks dan aktifkan core.hooksPath, lalu commit konfigurasinya.",
+                "commands": [
+                  "mkdir -p .githooks",
+                  "git config core.hooksPath .githooks",
+                  "git add .githooks && git commit -m 'chore: tambah pre-commit hook'"
+                ],
+                "checks": [
+                  { "type": "file_committed", "value": ".githooks/pre-commit", "label": "Hook ikut ter-commit" },
+                  { "type": "command_used", "value": "core.hooksPath", "label": "core.hooksPath diarahkan ke .githooks" },
+                  { "type": "command_used", "value": "commit", "label": "Konfigurasi hook di-commit" },
+                  { "type": "clean_worktree", "label": "Working tree bersih" }
+                ],
+                "hints": [
+                  "Hook default di .git/hooks tidak ikut ter-clone.",
+                  "Simpan hook di folder repo lalu arahkan core.hooksPath.",
+                  "Stage dan commit folder .githooks agar rekan tim mendapatkannya."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Kenapa hook di .git/hooks tidak otomatis dimiliki rekan tim setelah clone?",
+                  "explanation": "Isi .git tidak ikut ter-commit atau ter-clone, sehingga hook di sana hanya ada di mesinmu. Untuk berbagi, simpan hook di folder repo dan atur core.hooksPath, atau gunakan Husky.",
+                  "options": [
+                    { "text": "Karena .git tidak ikut ter-commit dan ter-clone", "correct": true },
+                    { "text": "Karena Git menghapus hook saat push", "correct": false },
+                    { "text": "Karena hook hanya berjalan di Windows", "correct": false },
+                    { "text": "Karena hook harus ditulis dalam YAML", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Hook mana yang paling tepat untuk memvalidasi format pesan commit?",
+                  "explanation": "commit-msg menerima file pesan commit dan bisa menjalankan commitlint. pre-commit berjalan sebelum pesan dibuat, sedangkan pre-push terlalu terlambat untuk menolak pesan.",
+                  "options": [
+                    { "text": "commit-msg", "correct": true },
+                    { "text": "pre-commit", "correct": false },
+                    { "text": "pre-push", "correct": false },
+                    { "text": "post-merge", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa dampak membiasakan diri memakai git commit --no-verify?",
+                  "explanation": "--no-verify melewati hook lokal, sehingga lint, validasi pesan, dan pemeriksaan secret tidak berjalan. Kalau ini jadi kebiasaan, satu-satunya pengaman yang tersisa adalah CI dan branch protection.",
+                  "options": [
+                    { "text": "Semua hook lokal dilewati sehingga pengecekan tidak berjalan", "correct": true },
+                    { "text": "Hook dijalankan dua kali", "correct": false },
+                    { "text": "Commit otomatis ditandatangani", "correct": false },
+                    { "text": "Hook dipindahkan ke .git/hooks", "correct": false }
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "github-actions-ci",
+              "title": "GitHub Actions untuk CI",
+              "estimated_minutes": 11,
+              "order_no": 2,
+              "content_md": "## Hook\n\nSetiap pull request, kamu mengingatkan di grup: \"sudah npm test belum?\" Suatu hari ada yang lupa, `main` merah, dan deploy tertahan. CI memindahkan pengecekan itu dari ingatan manusia ke mesin yang selalu berjalan dan tidak pernah lelah, siang maupun malam.\n\n## Konsep\n\nWorkflow GitHub Actions adalah file YAML di `.github/workflows/`. Struktur dasarnya:\n\n- `on` — pemicu: `push`, `pull_request`, atau `workflow_dispatch`.\n- `jobs` — kumpulan pekerjaan yang berjalan paralel secara default.\n- `runs-on` — mesin runner, misalnya `ubuntu-latest`.\n- `steps` — urutan langkah; `uses` memakai action, `run` menjalankan shell.\n\nUntuk proyek frontend, pola umumnya: checkout → setup Node → install → lint → test → build. Untuk backend Go: checkout → setup Go → `go test ./...` → `go build ./...`.\n\nGunakan `npm ci`, bukan `npm install`, agar dependency diambil persis dari `package-lock.json` dan build reproducible. Job terpisah berjalan paralel; gunakan `needs` jika job berikutnya bergantung pada hasil job sebelumnya, misalnya deploy setelah test. `actions/setup-node@v4` dengan `cache: npm` mempercepat instalasi berikutnya. Untuk Go, `actions/setup-go@v5` dengan `go-version-file: go.mod` menjaga versi tetap sinkron.\n\n## Workflow\n\n`.github/workflows/ci.yml`:\n\n```yaml\nname: CI\non:\n  push:\n    branches: [main]\n  pull_request:\n\njobs:\n  frontend:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 20\n          cache: npm\n      - run: npm ci\n      - run: npm run lint\n      - run: npm test -- --run\n      - run: npm run build\n\n  backend:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-go@v5\n        with:\n          go-version-file: go.mod\n          cache: true\n      - run: go test ./...\n      - run: go build ./...\n```\n\nAktifkan branch protection dan jadikan job `frontend` serta `backend` sebagai **required status checks**. Tanpa itu, CI hanya memberi informasi; ia tidak menghalangi merge saat merah.\n\n**Bahaya keamanan:** jangan memakai `pull_request_target` lalu checkout kode dari PR dan menjalankan `npm install`, karena kode tidak tepercaya bisa mencuri secret. Gunakan `pull_request` untuk menjalankan test. Jangan mencetak secret ke log, batasi `permissions`, dan pin action pihak ketiga ke commit SHA, bukan tag yang bisa dipindahkan.\n\n## Praktik\n\nBuat workflow CI yang berjalan pada pull request, memakai `actions/checkout@v4` dan `actions/setup-node@v4`, lalu commit file tersebut. Periksa tab Actions setelah push untuk memastikan workflow benar-benar berjalan, bukan hanya tersimpan.\n\n## Ringkasan\n\n- Workflow ada di `.github/workflows/*.yml`.\n- `checkout@v4` + `setup-node@v4`/`setup-go@v5` adalah fondasi job.\n- `npm ci` untuk build reproducible.\n- Required status checks membuat CI benar-benar menghalangi merge.\n- Perlakukan kode PR sebagai tidak tepercaya.\n\nCheat sheet: `actions/checkout@v4` · `actions/setup-node@v4` (cache: npm) · `actions/setup-go@v5` · `npm ci` · `go test ./...` · `on: pull_request`.",
+              "practice_config": {
+                "scenario": "basic",
+                "goal": "Tambahkan workflow CI di .github/workflows/ci.yml yang berjalan pada pull_request dengan checkout dan setup-node, lalu commit.",
+                "commands": [
+                  "mkdir -p .github/workflows",
+                  "git add .github/workflows/ci.yml",
+                  "git commit -m 'ci: tambah pipeline frontend'"
+                ],
+                "checks": [
+                  { "type": "file_committed", "value": ".github/workflows/ci.yml", "label": "Workflow CI ter-commit" },
+                  { "type": "commit_message_contains", "value": "ci", "label": "Pesan commit menjelaskan pipeline" },
+                  { "type": "command_used", "value": "commit", "label": "Workflow di-commit" },
+                  { "type": "clean_worktree", "label": "Working tree bersih" }
+                ],
+                "hints": [
+                  "Workflow harus berada di .github/workflows dengan ekstensi .yml.",
+                  "Gunakan actions/checkout@v4 sebelum setup Node.",
+                  "Stage file workflow lalu commit dengan pesan yang jelas."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Apa fungsi actions/checkout@v4 dalam sebuah job?",
+                  "explanation": "Checkout mengambil isi repository ke runner agar langkah berikutnya bisa membaca kode. Tanpa langkah ini, runner mulai dengan direktori kosong.",
+                  "options": [
+                    { "text": "Mengambil kode repository ke runner", "correct": true },
+                    { "text": "Mengunggah artefak build ke release", "correct": false },
+                    { "text": "Menjalankan unit test secara otomatis", "correct": false },
+                    { "text": "Membuat branch baru di repository", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Kenapa npm ci lebih disarankan daripada npm install di CI?",
+                  "explanation": "npm ci memasang dependency sesuai package-lock.json tanpa mengubah lockfile, sehingga hasilnya reproducible. npm install bisa memperbarui lockfile dan menghasilkan perbedaan antar-run.",
+                  "options": [
+                    { "text": "Karena memasang persis sesuai lockfile dan tidak mengubahnya", "correct": true },
+                    { "text": "Karena npm ci selalu lebih cepat dalam semua kasus", "correct": false },
+                    { "text": "Karena npm ci tidak membutuhkan package.json", "correct": false },
+                    { "text": "Karena npm ci otomatis menjalankan test", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Konfigurasi mana yang berisiko membocorkan secret pada PR dari fork?",
+                  "explanation": "pull_request_target berjalan dengan hak akses repository dan akses secret, lalu bila kamu checkout kode PR dan menjalankannya, kontributor luar bisa mencuri secret. Gunakan pull_request untuk menjalankan kode tidak tepercaya.",
+                  "options": [
+                    { "text": "pull_request_target yang checkout dan menjalankan kode PR dengan secret", "correct": true },
+                    { "text": "pull_request yang hanya menjalankan npm test", "correct": false },
+                    { "text": "workflow_dispatch tanpa secret", "correct": false },
+                    { "text": "push ke main yang menjalankan go test", "correct": false }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Keamanan",
+          "description": "Mencegah kebocoran kredensial dan memastikan hanya perubahan yang terverifikasi serta direview yang bisa masuk ke branch utama.",
+          "order_no": 16,
+          "lessons": [
+            {
+              "slug": "secret-dan-env",
+              "title": "Jangan Commit Secret & .env",
+              "estimated_minutes": 10,
+              "order_no": 1,
+              "content_md": "## Hook\n\nAplikasi baru jalan di laptopmu, jadi kamu menambahkan `.env` berisi koneksi database dan API key, lalu `git add .` dan push. Dua menit kemudian bot keamanan berkomentar: kredensial AWS terdeteksi. Key itu sekarang ada di internet, dan menghapusnya di commit berikutnya tidak menghapusnya dari sejarah.\n\n## Konsep\n\nSecret adalah apa pun yang memberi akses: password database, token API, private key, connection string, kredensial cloud. File `.env` adalah tempat umum menyimpannya secara lokal, dan file itu **tidak boleh masuk repository**.\n\nTiga lapisan pertahanan yang perlu dipasang:\n\n1. `.gitignore` sejak awal — minimal `.env`, `.env.local`, `*.pem`, `*.key`.\n2. `.env.example` sebagai dokumentasi variabel, berisi nama dan placeholder, tanpa nilai asli.\n3. Pemeriksaan otomatis — `gitleaks` sebagai pre-commit hook, plus GitHub secret scanning dan push protection.\n\n`gitleaks detect --source . -v` memindai working tree dan sejarah; `gitleaks protect --staged` memeriksa perubahan yang akan di-commit. Kalau secret sudah terlanjur masuk, urutan penanganannya penting: **rotasi/revoke kredensial dulu**, baru bersihkan sejarah. Menghapus file di commit baru tidak menghapusnya dari commit lama, dan siapa pun yang pernah clone tetap memilikinya.\n\nPembersihan sejarah memakai `git filter-repo --path .env --invert-paths`. Ini menulis ulang semua hash, jadi harus dikoordinasikan: semua orang berhenti push, semua branch dan tag dibersihkan, lalu setiap orang clone ulang. GitHub juga menyimpan commit lama di cache untuk sementara; hubungi support bila perlu.\n\n## Workflow\n\n```bash\nprintf '\\n.env\\n.env.local\\n*.pem\\n' >> .gitignore\ngit rm --cached .env\ngit add .gitignore .env.example\ngit commit -m 'chore: berhenti melacak file env'\n```\n\nPindai sebelum push:\n\n```bash\ngitleaks detect --source . -v\ngitleaks protect --staged\n```\n\nBila sudah bocor, rotasi kredensial lebih dulu, lalu bersihkan sejarah dan paksa semua ref sinkron:\n\n```bash\ngit filter-repo --path .env --invert-paths --force\ngit push --force --all\ngit push --force --tags\n```\n\n**Bahaya:** jangan menganggap `git rm .env` sebagai perbaikan. File tetap ada di commit lama dan bisa diambil siapa saja. Jangan juga menaruh secret di variabel yang di-echo di log CI. Gunakan secret manager atau environment variables platform, dan batasi akses baca repository.\n\n## Praktik\n\nTambahkan `.env` ke `.gitignore`, hentikan pelacakan file tersebut, dan commit `.env.example` sebagai dokumentasi. Pastikan `.env` tidak lagi ter-track.\n\n## Ringkasan\n\n- `.env` tidak pernah di-commit; sediakan `.env.example`.\n- Gitleaks mendeteksi secret di working tree, staging, dan sejarah.\n- Secret bocor: rotasi dulu, baru rewrite history.\n- History rewrite butuh koordinasi dan force push semua ref.\n\nCheat sheet: `git rm --cached .env` · `gitleaks detect --source . -v` · `gitleaks protect --staged` · `git filter-repo --path .env --invert-paths` · `git check-ignore -v .env`.",
+              "practice_config": {
+                "scenario": "basic",
+                "goal": "Hentikan pelacakan .env, tambahkan aturan .gitignore, dan commit .env.example sebagai template.",
+                "commands": [
+                  "printf '.env\\n.env.local\\n' >> .gitignore",
+                  "git rm --cached .env",
+                  "git add .gitignore .env.example",
+                  "git commit -m 'chore: amankan konfigurasi env'"
+                ],
+                "checks": [
+                  { "type": "file_absent", "value": ".env", "label": ".env tidak lagi ter-track" },
+                  { "type": "file_committed", "value": ".gitignore", "label": "Aturan .gitignore ter-commit" },
+                  { "type": "file_committed", "value": ".env.example", "label": "Template .env.example tersedia" },
+                  { "type": "command_used", "value": "rm --cached", "label": "File dihapus dari index, bukan dari disk" }
+                ],
+                "hints": [
+                  "Jangan hapus file .env dari disk; cukup hentikan pelacakannya.",
+                  "git rm --cached menghapus dari index tanpa menghapus file lokal.",
+                  "Pastikan .gitignore dan .env.example ikut di-commit."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Secret sudah terlanjur di-push ke repository publik. Apa langkah pertama?",
+                  "explanation": "Rotasi atau revoke kredensial lebih dulu karena secret sudah dianggap bocor. Membersihkan sejarah tanpa rotasi tetap meninggalkan kunci yang bisa dipakai dari salinan lain.",
+                  "options": [
+                    { "text": "Rotasi atau revoke kredensial tersebut", "correct": true },
+                    { "text": "Langsung hapus file di commit baru", "correct": false },
+                    { "text": "Ganti nama file lalu push", "correct": false },
+                    { "text": "Tambahkan .gitignore tanpa rotasi", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa isi yang tepat untuk .env.example?",
+                  "explanation": ".env.example mendokumentasikan nama variabel dengan placeholder, bukan nilai asli. Ini membantu onboarding tanpa membocorkan kredensial.",
+                  "options": [
+                    { "text": "Nama variabel dengan placeholder, tanpa nilai asli", "correct": true },
+                    { "text": "Salinan persis .env termasuk password", "correct": false },
+                    { "text": "Private key untuk development", "correct": false },
+                    { "text": "Token production agar tim bisa langsung deploy", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Kenapa git rm .env saja tidak cukup untuk menangani kebocoran?",
+                  "explanation": "git rm hanya menghapus file dari commit baru. Nilai secret tetap tersimpan di commit lama dan bisa diambil dari sejarah atau clone lain. Diperlukan rotasi dan pembersihan sejarah.",
+                  "options": [
+                    { "text": "Secret tetap ada di commit lama dan bisa diambil dari sejarah", "correct": true },
+                    { "text": "git rm otomatis mengunggah file ke release", "correct": false },
+                    { "text": "git rm menghapus semua branch", "correct": false },
+                    { "text": "git rm tidak bisa dipakai pada file .env", "correct": false }
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "signed-commits-branch-protection",
+              "title": "Signed Commits & Branch Protection",
+              "estimated_minutes": 11,
+              "order_no": 2,
+              "content_md": "## Hook\n\nSebuah commit muncul langsung di `main` dan mengubah konfigurasi deploy. Tidak ada pull request, tidak ada review, dan nama author-nya tidak dikenal siapa pun. Siapa pun yang punya akses tulis bisa mendorong apa saja. Dua kontrol menutup celah ini: commit yang ditandatangani dan branch protection di sisi server.\n\n## Konsep\n\n**Signed commit** membuktikan bahwa commit dibuat oleh pemegang kunci tertentu. Git mendukung GPG dan SSH signing. Untuk GPG:\n\n```bash\ngpg --full-generate-key\ngpg --list-secret-keys --keyid-format=long\ngit config --global user.signingkey <KEY_ID>\ngit config --global commit.gpgsign true\ngit commit -S -m 'feat: checkout v2'\ngit tag -s v1.4.0 -m 'Release 1.4.0'\ngit log --show-signature -1\n```\n\nKunci publik diunggah ke GitHub (Settings → SSH and GPG keys). GitHub akan menandai commit sebagai Verified, dan branch protection bisa mewajibkannya. SSH signing lebih sederhana: set `gpg.format ssh` dan `user.signingkey` ke public key, lalu unggah sebagai signing key.\n\n**Branch protection** (atau ruleset) adalah penegakan di server, bukan di laptop:\n\n- Wajib pull request sebelum merge ke `main`.\n- Minimal satu atau dua approval; dismiss approval lama saat ada push baru.\n- Wajib status check CI hijau.\n- Wajib conversation resolved dan signed commits.\n- Larang force push dan penghapusan branch.\n- Terapkan juga untuk administrator, agar tidak ada bypass diam-diam.\n\nHook lokal bisa dilewati dengan `--no-verify`, tetapi branch protection tidak bisa dilewati dari sisi klien. Inilah lapisan yang benar-benar menjaga `main`.\n\n## Workflow\n\nAktifkan signing dan buat commit bertanda tangan:\n\n```bash\ngit config --global gpg.format ssh\ngit config --global user.signingkey ~/.ssh/id_ed25519.pub\ngit config --global commit.gpgsign true\ngit commit -S -m 'fix: validasi total pembayaran'\ngit log --show-signature -1\ngit push origin main\n```\n\nAtur proteksi lewat UI GitHub atau `gh api`. Contoh pemeriksaan status proteksi:\n\n```bash\ngh api repos/ORG/REPO/branches/main/protection\n```\n\n**Bahaya:** signed commit membuktikan siapa pemegang kunci, bukan bahwa kodenya benar atau aman. Jangan pernah commit private key. Kalau kunci bocor, revoke dan ganti; commit lama tetap tampak verified. Hati-hati dengan daftar bypass pada ruleset — satu akun admin yang dikecualikan cukup untuk membatalkan seluruh kontrol. Dan jangan menandatangani commit orang lain lalu mengaku sebagai penulisnya; signature memverifikasi committer, bukan niat baik.\n\n## Praktik\n\nKonfigurasikan signing key, buat satu commit bertanda tangan, lalu push ke origin. Pastikan working tree bersih dan branch remote tetap sinkron.\n\n## Ringkasan\n\n- GPG/SSH signing memverifikasi identitas pembuat commit.\n- `git commit -S`, `git tag -s`, verifikasi dengan `git log --show-signature`.\n- Branch protection: PR wajib, approval, status check, signed commits, larang force push.\n- Kontrol server lebih kuat daripada hook lokal.\n\nCheat sheet: `gpg --full-generate-key` · `git config user.signingkey <id>` · `git commit -S` · `git tag -s` · `git log --show-signature` · `gh api repos/ORG/REPO/branches/main/protection`.",
+              "practice_config": {
+                "scenario": "remote",
+                "goal": "Konfigurasikan signing key, buat commit bertanda tangan, lalu push ke origin.",
+                "commands": [
+                  "git config user.signingkey ~/.ssh/id_ed25519.pub",
+                  "git commit -S -m 'fix: validasi total pembayaran'",
+                  "git push origin main",
+                  "git log --show-signature -1"
+                ],
+                "checks": [
+                  { "type": "command_used", "value": "config user.signingkey", "label": "Signing key dikonfigurasi" },
+                  { "type": "command_used", "value": "commit -S", "label": "Commit dibuat dengan tanda tangan" },
+                  { "type": "remote_branch_exists", "value": "main", "remote": "origin", "label": "Commit terkirim ke origin/main" },
+                  { "type": "clean_worktree", "label": "Working tree bersih" }
+                ],
+                "hints": [
+                  "Tentukan kunci yang dipakai Git sebelum membuat commit.",
+                  "Flag -S meminta Git menandatangani commit.",
+                  "Verifikasi dengan git log --show-signature, lalu push."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Apa yang dibuktikan oleh commit yang signed dan Verified di GitHub?",
+                  "explanation": "Signature membuktikan commit dibuat dengan kunci yang terdaftar pada akun tersebut. Ia tidak menjamin kode bebas bug atau bahwa review sudah dilakukan.",
+                  "options": [
+                    { "text": "Commit dibuat dengan kunci yang terdaftar pada akun tersebut", "correct": true },
+                    { "text": "Kode sudah melalui review dan bebas bug", "correct": false },
+                    { "text": "Commit sudah otomatis di-merge ke main", "correct": false },
+                    { "text": "Repository tidak bisa di-force push", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Kenapa branch protection lebih kuat daripada Git hook lokal?",
+                  "explanation": "Hook lokal berjalan di mesin pengguna dan bisa dilewati dengan --no-verify. Branch protection ditegakkan server GitHub sehingga aturan tetap berlaku apa pun yang dilakukan di laptop.",
+                  "options": [
+                    { "text": "Karena ditegakkan di server dan tidak bisa dilewati dari klien", "correct": true },
+                    { "text": "Karena hook lokal tidak bisa dijalankan di Windows", "correct": false },
+                    { "text": "Karena branch protection menandatangani commit otomatis", "correct": false },
+                    { "text": "Karena branch protection menghapus commit yang tidak di-review", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Aturan mana yang paling tepat mencegah perubahan langsung ke main?",
+                  "explanation": "Require pull request before merging memaksa setiap perubahan melewati PR, review, dan status check. Larangan force push penting, tetapi tidak mencegah commit langsung.",
+                  "options": [
+                    { "text": "Require a pull request before merging", "correct": true },
+                    { "text": "Require linear history saja", "correct": false },
+                    { "text": "Allow force pushes", "correct": false },
+                    { "text": "Require signed commits saja", "correct": false }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "cheatsheet": [
+    {
+      "category": "Rebase",
+      "command": "git rebase -i HEAD~3",
+      "description": "Membuka tiga commit terakhir untuk dirapikan: pick, reword, edit, squash, fixup, atau drop.",
+      "example": "git rebase -i HEAD~3"
+    },
+    {
+      "category": "Rebase",
+      "command": "git cherry-pick <sha>",
+      "description": "Menyalin satu commit tertentu ke branch aktif sebagai commit baru dengan hash baru.",
+      "example": "git cherry-pick 9f8e7d6"
+    },
+    {
+      "category": "Rebase",
+      "command": "git stash push -u -m 'wip'",
+      "description": "Menyimpan perubahan sementara, termasuk file untracked, agar working tree bersih.",
+      "example": "git stash push -u -m 'wip filter produk'"
+    },
+    {
+      "category": "Rebase",
+      "command": "git push --force-with-lease",
+      "description": "Push paksa yang aman: ditolak jika remote sudah berubah sejak fetch terakhir.",
+      "example": "git push --force-with-lease"
+    },
+    {
+      "category": "Debug",
+      "command": "git reflog",
+      "description": "Melihat pergerakan HEAD dan ref lokal; sumber utama untuk memulihkan commit yang tampak hilang.",
+      "example": "git reflog && git reset --hard HEAD@{1}"
+    },
+    {
+      "category": "Debug",
+      "command": "git bisect run npm test",
+      "description": "Mencari commit penyebab bug dengan binary search otomatis; exit 0 = good, non-zero = bad, 125 = skip.",
+      "example": "git bisect start HEAD v1.3.0 && git bisect run npm test"
+    },
+    {
+      "category": "Debug",
+      "command": "git blame -L 40,60 file",
+      "description": "Menampilkan commit terakhir yang mengubah tiap baris pada rentang tertentu.",
+      "example": "git blame -L 40,60 -w src/checkout/Cart.jsx"
+    },
+    {
+      "category": "Release",
+      "command": "git tag -a v1.4.0 -m 'Release 1.4.0'",
+      "description": "Membuat annotated tag berisi pembuat, tanggal, dan pesan untuk commit rilis.",
+      "example": "git tag -a v1.4.0 -m 'Release 1.4.0: checkout v2'"
+    },
+    {
+      "category": "Release",
+      "command": "git push origin v1.4.0",
+      "description": "Mengirim satu tag ke remote; git push biasa tidak mengirim tag.",
+      "example": "git push origin --tags"
+    },
+    {
+      "category": "Release",
+      "command": "gh release create v1.4.0 --generate-notes",
+      "description": "Membuat GitHub Release dari tag dengan catatan rilis yang dirangkum otomatis dari PR dan commit.",
+      "example": "gh release create v1.4.0 --title 'v1.4.0' --generate-notes"
+    },
+    {
+      "category": "Otomasi",
+      "command": "git config core.hooksPath .githooks",
+      "description": "Mengarahkan Git ke folder hook yang ikut ter-commit sehingga bisa dibagikan ke tim.",
+      "example": "git config core.hooksPath .githooks"
+    },
+    {
+      "category": "Otomasi",
+      "command": "actions/checkout@v4",
+      "description": "Action pertama di job CI untuk mengambil kode repository ke runner.",
+      "example": "- uses: actions/checkout@v4"
+    },
+    {
+      "category": "Otomasi",
+      "command": "actions/setup-node@v4",
+      "description": "Menyiapkan versi Node dan cache dependency npm di runner CI.",
+      "example": "- uses: actions/setup-node@v4\n  with:\n    node-version: 20\n    cache: npm"
+    },
+    {
+      "category": "Keamanan",
+      "command": "gitleaks detect --source . -v",
+      "description": "Memindai working tree dan sejarah Git untuk mendeteksi kredensial yang bocor.",
+      "example": "gitleaks detect --source . -v"
+    },
+    {
+      "category": "Keamanan",
+      "command": "git filter-repo --path .env --invert-paths",
+      "description": "Menghapus file dari seluruh sejarah; semua hash berubah sehingga butuh koordinasi dan force push.",
+      "example": "git filter-repo --path .env --invert-paths --force"
+    }
+  ]
+}

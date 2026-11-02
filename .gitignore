@@ -1,0 +1,21 @@
+# dependencies
+node_modules/
+frontend/dist/
+backend/bin/
+
+# env & secrets
+.env
+*.local
+backend/.env
+
+# build & test artifacts
+coverage/
+*.out
+*.test
+.vite/
+
+# editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

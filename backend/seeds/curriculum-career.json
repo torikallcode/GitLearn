@@ -1,0 +1,519 @@
+{
+  "paths": [
+    {
+      "slug": "karier-frontend",
+      "title": "Karier Frontend Engineer",
+      "description": "Kuasai workflow profesional Frontend: dari deployment otomatis, standardisasi commit monorepo, hingga audit UI melalui Pull Request.",
+      "order_no": 4,
+      "track": "frontend",
+      "modules": [
+        {
+          "title": "Frontend Engineer",
+          "description": "Langkah awal menjadi Frontend Engineer yang siap kerja di tim modern.",
+          "order_no": 1,
+          "lessons": [
+            {
+              "slug": "deploy-github-pages-vercel",
+              "title": "Deploy ke GitHub Pages & Vercel",
+              "estimated_minutes": 10,
+              "order_no": 1,
+              "content_md": "## Hook\nAnda baru saja menyelesaikan landing page portfolio yang sangat elegan menggunakan React dan Tailwind. Klien atau hiring manager ingin melihat hasilnya sekarang juga. Apakah Anda akan mengirim folder `dist.zip` lewat email? Tentu tidak. Di industri profesional, kita menggunakan platform deployment otomatis yang terhubung langsung ke repository Git. Memahami alur kerja dari kode lokal ke server publik adalah syarat mutlak bagi setiap Frontend Engineer.\n\n## Konsep\nDeployment modern tidak lagi melibatkan proses upload file secara manual via FTP. Kita menggunakan konsep **Continuous Deployment (CD)**. Dalam alur ini, repository Git Anda bertindak sebagai sumber kebenaran tunggal (Single Source of Truth). Setiap kali ada perubahan kode yang disetujui, platform deployment akan otomatis menarik kode tersebut, menjalankan proses build, dan memperbarui website dalam hitungan detik.\n\n### 1. GitHub Pages\nGitHub Pages adalah layanan hosting situs statis yang disediakan oleh GitHub. Sangat cocok untuk proyek open-source, dokumentasi, atau portfolio pribadi. Anda bisa mengaktifkannya melalui menu **Settings > Pages** di repository Anda. GitHub Pages mendukung deployment dari branch tertentu (seperti `gh-pages` atau `main`) atau melalui GitHub Actions yang lebih fleksibel.\n\n### 2. Vercel\nVercel adalah standar industri saat ini untuk mendeploy framework modern seperti React, Next.js, atau Vue. Keunggulan utama Vercel yang sangat dicintai tim pengembang adalah **Preview Deployments**. Setiap kali Anda membuka Pull Request, Vercel akan otomatis membuat URL unik untuk PR tersebut. Ini memungkinkan designer atau manajer produk meninjau hasil kerja Anda tanpa harus mengunduh kode atau menunggu merge ke branch utama. Jika Anda ingin bekerja di startup unicorn atau tech company besar, menguasai workflow Vercel adalah nilai tambah yang besar.\n\n### Contoh Konfigurasi GitHub Actions untuk Pages (2026)\nUntuk kontrol lebih presisi, kita bisa menggunakan GitHub Actions versi terbaru:\n```yaml\nname: Deploy to Pages\non:\n  push:\n    branches: [main]\npermissions:\n  contents: read\n  pages: write\n  id-token: write\njobs:\n  deploy:\n    environment:\n      name: github-pages\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout\n        uses: actions/checkout@v4\n      - name: Set up Node\n        uses: actions/setup-node@v4\n        with:\n          node-version: 20\n          cache: 'npm'\n      - run: npm ci\n      - run: npm run build\n      - name: Upload artifact\n        uses: actions/upload-pages-artifact@v3\n        with:\n          path: './dist'\n      - name: Deploy to GitHub Pages\n        uses: actions/deploy-pages@v4\n```\n\n## Praktik\nSekarang, mari kita simulasikan proses menghubungkan repository lokal Anda ke server GitHub agar bisa dideteksi oleh platform deployment.\n1. Tambahkan remote origin menggunakan URL repository (simulasi).\n2. Push branch `main` ke remote tersebut.\n\n## Ringkasan\n- **GitHub Pages**: Gratis, handal untuk file statis dan portfolio.\n- **Vercel**: Mendukung Preview Deployment, sangat cocok untuk framework JavaScript modern.\n- **Automation**: Deployment dipicu oleh event Git seperti `push` atau `merge`.\n\n**Pro Tip Karier:** Hiring manager sering melihat seberapa rapi Anda mengelola deployment. Pastikan `README.md` Anda mencantumkan link demo live yang selalu terupdate otomatis via CI/CD.",
+              "practice_config": {
+                "scenario": "remote",
+                "goal": "Hubungkan repository ke remote origin dan push branch main.",
+                "commands": ["git remote add origin", "git push"],
+                "checks": [
+                  { "type": "remote_branch_exists", "value": "main", "remote": "origin", "label": "Branch main sudah di-push ke remote origin" }
+                ],
+                "hints": [
+                  "Gunakan 'git remote add origin' diikuti URL simulasi.",
+                  "Lakukan 'git push -u origin main' untuk mengirim data.",
+                  "Pastikan koneksi remote sudah benar dengan 'git remote -v'."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Apa keunggulan utama Vercel dibandingkan GitHub Pages konvensional?",
+                  "explanation": "Vercel secara otomatis membuat link preview untuk setiap Pull Request, memudahkan kolaborasi sebelum kode di-merge ke main.",
+                  "options": [
+                    { "text": "Hanya Vercel yang bisa menjalankan JavaScript.", "correct": false },
+                    { "text": "Fitur Preview Deployment untuk setiap Pull Request.", "correct": true },
+                    { "text": "Vercel tidak membutuhkan Git untuk deploy.", "correct": false },
+                    { "text": "GitHub Pages berbayar untuk repository publik.", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Mengapa folder `node_modules` tidak boleh ikut di-push ke repository?",
+                  "explanation": "Ukurannya sangat besar dan isinya bisa berbeda tiap OS. Platform deploy akan menginstallnya sendiri berdasarkan `package.json`.",
+                  "options": [
+                    { "text": "Karena dilarang oleh lisensi NPM.", "correct": false },
+                    { "text": "Akan menyebabkan error saat runtime di Vercel.", "correct": false },
+                    { "text": "Ukurannya terlalu besar dan isinya bisa di-generate ulang oleh server.", "correct": true },
+                    { "text": "Folder tersebut berisi data sensitif user.", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Command apa yang digunakan untuk menghubungkan repo lokal pertama kali ke GitHub?",
+                  "explanation": "git remote add origin digunakan untuk mendefinisikan URL tujuan remote dengan nama alias 'origin'.",
+                  "options": [
+                    { "text": "git connect origin <url>", "correct": false },
+                    { "text": "git remote add origin <url>", "correct": true },
+                    { "text": "git push --setup <url>", "correct": false },
+                    { "text": "git init --remote <url>", "correct": false }
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "conventional-commits-monorepo",
+              "title": "Conventional Commits untuk Monorepo UI",
+              "estimated_minutes": 12,
+              "order_no": 2,
+              "content_md": "## Hook\n\"Update landing page\", \"Fix bug\", \"Coba-coba\". Apakah history commit di repository Anda terlihat seperti catatan harian yang membingungkan? Di perusahaan teknologi besar dengan puluhan engineer yang bekerja secara paralel pada satu monorepo UI (menyimpan komponen, landing page, dan design system dalam satu repo), pesan commit yang tidak terstruktur adalah awal dari kekacauan. Rekan satu tim tidak akan tahu perubahan apa yang merusak sistem.\n\n## Konsep\n**Conventional Commits** adalah spesifikasi ringan penulisan pesan commit yang memberikan manusia dan mesin struktur yang jelas. Format standarnya adalah:\n`<type>(<scope>): <description>`\n\n### Tipe Utama yang Wajib Diketahui:\n- **`feat`**: Menambahkan fitur baru (berkaitan dengan kenaikan versi minor).\n- **`fix`**: Memperbaiki bug (berkaitan dengan kenaikan versi patch).\n- **`style`**: Perubahan spasi, formatting CSS, atau titik koma (tidak mengubah logika kode).\n- **`refactor`**: Perubahan kode yang bukan fitur baru dan bukan bug fix (misal: merapikan komponen).\n- **`chore`**: Perubahan pada build process, dependensi, atau alat bantu lainnya (seperti update package.json).\n\n### Mengapa Penting di Monorepo?\nDalam monorepo, ada banyak paket (misal: `@ui/button`, `@ui/modal`, `web-app`). Penggunaan **Scope** (dalam tanda kurung) sangat krusial:\n- `feat(button): add variant secondary` -> Berdampak pada paket button.\n- `fix(modal): resolve focus trap issue` -> Berdampak pada paket modal.\n\nSelain itu, format ini memungkinkan pembuatan **Changelog Otomatis** dan penerapan **Semantic Versioning** secara instan tanpa intervensi manual yang melelahkan.\n\n### Contoh Perbandingan\n- **Buruk**: `git commit -m \"benerin tombol yang error\"`\n- **Profesional**: `git commit -m \"fix(button): resolve disabled state styling on mobile view\"`\n\n## Praktik\nMari buat commit baru menggunakan format Conventional Commits untuk komponen UI baru.\n1. Buat file `ui/Button.js` (mensimulasikan penambahan kode komponen).\n2. Stage file tersebut ke staging area.\n3. Lakukan commit dengan pesan terstandar: `feat(ui): add primary button component`.\n\n## Ringkasan\n- Conventional Commits menggunakan format `<type>(<scope>): <description>`.\n- Membantu otomatisasi changelog dan manajemen versi.\n- Scope sangat penting dalam monorepo untuk melacak modul mana yang berubah.\n\n**Pro Tip Karier:** Saat interview teknik, developer yang menulis pesan commit rapi dan deskriptif selalu dinilai lebih tinggi karena menunjukkan empati terhadap tim.",
+              "practice_config": {
+                "scenario": "basic",
+                "goal": "Buat commit fitur baru menggunakan format Conventional Commits.",
+                "commands": ["touch ui/Button.js", "git add ui/Button.js", "git commit -m \"feat(ui): add primary button component\""],
+                "checks": [
+                  { "type": "file_committed", "value": "ui/Button.js", "label": "File ui/Button.js sudah di-commit" },
+                  { "type": "commit_message_contains", "value": "feat(ui):", "label": "Pesan commit menggunakan format feat(ui):" }
+                ],
+                "hints": [
+                  "Buat folder 'ui' dan file 'Button.js' terlebih dahulu.",
+                  "Gunakan 'git add ui/Button.js' untuk memasukkannya ke staging.",
+                  "Tulis pesan commit persis: feat(ui): add primary button component"
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Manakah pesan commit yang mengikuti standar Conventional Commits?",
+                  "explanation": "Format yang benar adalah <type>(scope): description. Opsi C memenuhi kriteria ini.",
+                  "options": [
+                    { "text": "adding new login feature", "correct": false },
+                    { "text": "feat - login: added google login", "correct": false },
+                    { "text": "feat(auth): add google login integration", "correct": true },
+                    { "text": "FIX(UI) change color", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Tipe commit apa yang digunakan jika Anda hanya memperbaiki typo di file README?",
+                  "explanation": "Perubahan pada dokumentasi menggunakan tipe 'docs'.",
+                  "options": [
+                    { "text": "feat", "correct": false },
+                    { "text": "fix", "correct": false },
+                    { "text": "chore", "correct": false },
+                    { "text": "docs", "correct": true }
+                  ]
+                },
+                {
+                  "question": "Apa manfaat utama menggunakan Conventional Commits di tim besar?",
+                  "explanation": "Standarisasi memungkinkan pembuatan changelog otomatis dan memudahkan navigasi history repo bagi ribuan developer.",
+                  "options": [
+                    { "text": "Mengecilkan ukuran file repository.", "correct": false },
+                    { "text": "Mempercepat proses git push.", "correct": false },
+                    { "text": "Memungkinkan pembuatan changelog otomatis oleh mesin.", "correct": true },
+                    { "text": "Menghilangkan kebutuhan akan Pull Request.", "correct": false }
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "ci-lint-test-build",
+              "title": "CI: Lint, Test, Build di GitHub Actions",
+              "estimated_minutes": 11,
+              "order_no": 3,
+              "content_md": "## Hook\n\"Kodenya jalan di laptop saya!\". Kalimat ini sering diucapkan saat aplikasi error di production. Masalahnya: laptop Anda berbeda dengan server. Kita butuh wasit yang memeriksa kode di 'lapangan netral' sebelum kode tersebut di-merge.\n\n## Konsep\n**Continuous Integration (CI)** adalah praktik menjalankan pengecekan otomatis setiap kali ada kode baru. Kita biasanya menggunakan **GitHub Actions**.\n\n### Tahapan Utama (Pipeline):\n1. **Linting**: Memeriksa penulisan kode (apakah rapi? sesuai aturan tim?). Kita memakai tool seperti ESLint.\n2. **Testing**: Menjalankan unit test (Vitest/Jest) untuk memastikan fungsi tidak rusak.\n3. **Building**: Mencoba membuild aplikasi. Jika build error di CI, jangan harap bisa sukses di production.\n\n### Workflow YAML (v4/v5/v6)\nFile ini diletakkan di `.github/workflows/ci.yml`.\n\n```yaml\nname: Frontend CI\non:\n  pull_request:\n    branches: [main]\njobs:\n  check:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 20\n          cache: 'npm'\n      - run: npm ci\n      - run: npm run lint\n      - run: npm test\n      - run: npm run build\n```\n\n## Praktik\nSimulasikan penambahan workflow CI ke repository Anda.\n1. Buat file `.github/workflows/ci.yml`.\n2. Lakukan commit file tersebut.\n\n## Ringkasan\n- CI menjamin kualitas kode di server netral.\n- GitHub Actions menggunakan file YAML.\n- Gunakan `actions/checkout@v4` dan `actions/setup-node@v4` untuk efisiensi.\n\n**Cheat Sheet CI:**\n- `on: push`: Berjalan setiap ada push.\n- `on: pull_request`: Berjalan saat PR dibuat.\n- `jobs`: Kumpulan langkah yang dijalankan paralel/sekuensial.\n- `steps`: Urutan perintah dalam satu job.",
+              "practice_config": {
+                "scenario": "basic",
+                "goal": "Tambahkan konfigurasi GitHub Actions CI ke project Anda.",
+                "commands": ["mkdir -p .github/workflows", "touch .github/workflows/ci.yml", "git add .", "git commit -m \"chore: add github actions ci\""],
+                "checks": [
+                  { "type": "file_committed", "value": ".github/workflows/ci.yml", "label": "File workflow CI sudah di-commit" },
+                  { "type": "command_used", "value": ".github/workflows", "label": "Menggunakan folder .github/workflows" }
+                ],
+                "hints": [
+                  "Buat folder .github/workflows terlebih dahulu.",
+                  "Buat file ci.yml di dalam folder tersebut.",
+                  "Jangan lupa git add dan git commit pesan yang sesuai."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Mengapa kita perlu menjalankan 'npm run build' di dalam proses CI?",
+                  "explanation": "Untuk memastikan bahwa kode tidak hanya benar secara logika (test pass) tapi juga bisa dikompilasi menjadi bundel production tanpa error.",
+                  "options": [
+                    { "text": "Agar website otomatis terupdate.", "correct": false },
+                    { "text": "Untuk mendeteksi error kompilasi sebelum sampai ke user.", "correct": true },
+                    { "text": "Untuk menghapus file yang tidak terpakai.", "correct": false },
+                    { "text": "Karena build di CI lebih cepat daripada di laptop.", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Action mana yang paling tepat untuk mengunduh kode repository di GitHub Actions pada tahun 2026?",
+                  "explanation": "actions/checkout@v4 adalah versi stabil yang direkomendasikan untuk mengambil source code di workflow.",
+                  "options": [
+                    { "text": "actions/download-code@v1", "correct": false },
+                    { "text": "actions/checkout@v4", "correct": true },
+                    { "text": "git/clone@v2", "correct": false },
+                    { "text": "npm/install@v3", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa fungsi dari 'on: pull_request' dalam file YAML workflow?",
+                  "explanation": "Ini menentukan trigger atau pemicu kapan workflow tersebut harus dijalankan.",
+                  "options": [
+                    { "text": "Menghapus Pull Request yang gagal test.", "correct": false },
+                    { "text": "Menentukan kapan workflow dijalankan (saat ada PR).", "correct": true },
+                    { "text": "Memberikan izin edit pada Pull Request.", "correct": false },
+                    { "text": "Mengirim email ke pemilik repo.", "correct": false }
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "review-pr-komponen-ui",
+              "title": "Review PR Komponen UI & Preview Deployment",
+              "estimated_minutes": 9,
+              "order_no": 4,
+              "content_md": "## Hook\nAnda menerima Pull Request berisi 2.000 baris perubahan CSS. Bagaimana Anda memastikan tampilannya tidak berantakan tanpa harus mendownload kode teman Anda ke laptop sendiri?\n\n## Konsep\n**Code Review** di Frontend bukan hanya soal logika, tapi juga visual. Sebagai reviewer, Anda harus:\n1. **Cek preview deployment**: Klik link dari Vercel/Netlify di komentar PR. Lihat langsung komponennya.\n2. **Pastikan konsistensi**: Apakah warna tombol sudah sesuai Design System?\n3. **Cek responsivitas**: Buka preview di HP atau resize browser.\n\n### Workflow Pull Request Profesional\n1. Developer membuat fitur di branch `feat/new-navbar`.\n2. Developer melakukan `push` dan klik **Create Pull Request** di GitHub.\n3. CI berjalan (Lint/Test) dan platform deployment membuat **Preview Link**.\n4. Reviewer memberikan komentar pada baris kode yang kurang efisien.\n5. Jika semua oke, PR di-merge ke `main`.\n\n### Best Practice Review\n- Jangan hanya bilang \"Jelek\". Berikan saran perbaikan: \"Coba gunakan `flex-gap` daripada `margin` agar lebih rapi\".\n- Gunakan **Squash and Merge** untuk menjaga history `main` tetap bersih (satu fitur = satu commit).\n\n## Praktik\nSelesaikan proses kolaborasi dengan menggabungkan branch fitur ke branch utama.\n1. Pindah ke branch `main`.\n2. Merge branch `feat/navbar` ke `main`.\n\n## Ringkasan\n- Preview deployment adalah kunci review UI.\n- Pull Request adalah tempat diskusi kualitas kode.\n- Gunakan merge strategy yang disepakati tim.\n\n**Cheat Sheet Review:**\n- `git merge --squash`: Menggabungkan semua commit PR menjadi satu.\n- `git diff main...feature`: Melihat perbedaan antara base dan head branch.",
+              "practice_config": {
+                "scenario": "branches",
+                "goal": "Gabungkan branch feat/navbar ke branch main.",
+                "commands": ["git switch main", "git merge feat/navbar"],
+                "checks": [
+                  { "type": "branch_merged", "value": "feat/navbar", "into": "main", "label": "Branch feat/navbar sudah di-merge ke main" },
+                  { "type": "head_branch", "value": "main", "label": "Berada di branch main" }
+                ],
+                "hints": [
+                  "Pastikan Anda berada di branch tujuan (main) sebelum merge.",
+                  "Gunakan 'git switch main' terlebih dahulu.",
+                  "Jalankan 'git merge feat/navbar'."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Apa itu Preview Deployment dalam konteks Pull Request?",
+                  "explanation": "Preview deployment adalah instance live dari aplikasi yang merefleksikan perubahan di PR tersebut, terpisah dari production.",
+                  "options": [
+                    { "text": "Screenshot hasil kerja developer.", "correct": false },
+                    { "text": "Link website sementara untuk meninjau perubahan visual secara langsung.", "correct": true },
+                    { "text": "Versi demo yang hanya bisa dibuka di localhost.", "correct": false },
+                    { "text": "Video tutorial cara pakai fitur baru.", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Mengapa 'Squash and Merge' sering disukai di branch utama?",
+                  "explanation": "Squash meringkas banyak commit kecil (seperti 'fix typo', 'retry ci') menjadi satu commit fitur yang bersih.",
+                  "options": [
+                    { "text": "Karena prosesnya lebih cepat.", "correct": false },
+                    { "text": "Untuk menjaga history commit di branch main tetap bersih dan bermakna.", "correct": true },
+                    { "text": "Agar kode tidak bisa di-revert.", "correct": false },
+                    { "text": "Untuk menghemat kuota penyimpanan GitHub.", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa yang harus Anda lakukan jika menemukan bug visual saat mereview PR?",
+                  "explanation": "Memberikan komentar spesifik pada baris kode atau memberikan feedback di PR adalah cara kolaborasi yang benar.",
+                  "options": [
+                    { "text": "Langsung merge saja dan perbaiki nanti.", "correct": false },
+                    { "text": "Memberikan feedback/komentar di Pull Request agar diperbaiki oleh pembuatnya.", "correct": true },
+                    { "text": "Menghapus repository teman Anda.", "correct": false },
+                    { "text": "Memperbaiki diam-diam di laptop Anda.", "correct": false }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "karier-backend",
+      "title": "Karier Backend Engineer",
+      "description": "Pelajari strategi branching tingkat lanjut untuk microservices, otomatisasi Docker, hingga mitigasi konflik migrasi database.",
+      "order_no": 5,
+      "track": "backend",
+      "modules": [
+        {
+          "title": "Backend Engineer",
+          "description": "Kuasai pengelolaan infrastruktur dan reliabilitas API menggunakan Git.",
+          "order_no": 1,
+          "lessons": [
+            {
+              "slug": "branching-service-dan-migrasi",
+              "title": "Branching untuk Service & Migrasi Database",
+              "estimated_minutes": 12,
+              "order_no": 1,
+              "content_md": "## Hook\nDua developer mengubah skema database yang sama di waktu bersamaan. Satu menghapus kolom `address`, satu lagi menambah kolom `address_line_2`. Saat digabung, aplikasi crash di server production. Bagaimana Git mencegah bencana ini?\n\n## Konsep\nSebagai Backend Engineer, repository Anda sering berisi file **Database Migration**. File ini sangat sensitif terhadap urutan.\n\n### Strategi Branching\n1. **Feature Branching**: Setiap API baru dikerjakan di branch terpisah (misal: `feat/api-payment`).\n2. **Trunk-Based Development**: Developer sering melakukan merge ke `main` (minimal 1x sehari) agar konflik tidak menumpuk.\n\n### Menangani Konflik Migrasi\nSaat terjadi merge conflict di file SQL migration:\n1. **Jangan asal pilih 'Accept Both'**. Periksa apakah urutan (timestamp) file migration masih valid.\n2. **Gunakan Rebase**: Melakukan rebase branch fitur Anda ke `main` terbaru sebelum merge akan membantu Anda mendeteksi konflik migrasi lebih awal di lingkungan local.\n\n### Contoh Struktur Folder\n```text\nbackend/\n├── cmd/\n├── internal/\n└── migrations/\n    ├── 20261001_create_users.sql\n    ├── 20261005_add_email.sql\n```\n\n## Praktik\nSelesaikan konflik yang terjadi pada file migrasi database.\n1. Lakukan merge branch `feat/migration-conflict` ke `main`.\n2. Selesaikan konflik pada file `migrations/001_schema.sql`.\n3. Commit hasil resolusi konflik.\n\n## Ringkasan\n- File migrasi database sensitif terhadap urutan.\n- Gunakan rebase untuk menyinkronkan branch dengan `main` terbaru.\n- Selalu jalankan test migrasi di local sebelum push.\n\n**Cheat Sheet:**\n- `git rebase main`: Memindahkan basis branch Anda ke commit terbaru main.\n- `git status`: Melihat file mana yang mengalami konflik.",
+              "practice_config": {
+                "scenario": "conflict",
+                "goal": "Selesaikan konflik pada file migrasi database.",
+                "commands": ["git merge feat/migration-conflict", "git add migrations/001_schema.sql", "git commit"],
+                "checks": [
+                  { "type": "conflict_resolved", "value": "migrations/001_schema.sql", "label": "Konflik pada migrations/001_schema.sql sudah diselesaikan" },
+                  { "type": "clean_worktree", "label": "Working tree bersih (sudah commit)" }
+                ],
+                "hints": [
+                  "Mulai dengan mencoba merge branch yang konflik.",
+                  "Edit file yang bermasalah, hapus marker <<<<< dan >>>>>.",
+                  "Gunakan git add dan git commit untuk menandai resolusi selesai."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Mengapa file migrasi database sering menyebabkan konflik di Git?",
+                  "explanation": "Karena beberapa developer mungkin membuat file migrasi baru secara paralel yang mengubah tabel yang sama atau menggunakan urutan nomor/timestamp yang berdekatan.",
+                  "options": [
+                    { "text": "Karena file SQL terlalu berat.", "correct": false },
+                    { "text": "Karena perubahan skema database dilakukan secara paralel oleh banyak tim.", "correct": true },
+                    { "text": "Git tidak mendukung format file .sql.", "correct": false },
+                    { "text": "Database selalu terkunci saat ada branch baru.", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Kapan waktu terbaik untuk melakukan rebase branch fitur Anda ke main?",
+                  "explanation": "Melakukan rebase secara rutin (setiap pagi atau sebelum merge) membantu mendeteksi konflik lebih awal sebelum kode masuk ke production.",
+                  "options": [
+                    { "text": "Setelah kode sudah di-deploy ke production.", "correct": false },
+                    { "text": "Hanya saat disuruh oleh senior developer.", "correct": false },
+                    { "text": "Secara berkala agar branch Anda tetap sinkron dengan perubahan terbaru di main.", "correct": true },
+                    { "text": "Jangan pernah gunakan rebase karena berbahaya.", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa fungsi dari folder 'migrations' dalam repository backend profesional?",
+                  "explanation": "Folder ini menyimpan sejarah perubahan skema database sehingga state database bisa direproduksi di server mana pun.",
+                  "options": [
+                    { "text": "Menyimpan backup data user.", "correct": false },
+                    { "text": "Menyimpan file SQL untuk mengubah struktur database secara terkontrol.", "correct": true },
+                    { "text": "Tempat menyimpan file konfigurasi Docker.", "correct": false },
+                    { "text": "Tempat menyimpan file log aplikasi.", "correct": false }
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "versioning-api-dan-changelog",
+              "title": "Versioning API, Tagging, & Changelog",
+              "estimated_minutes": 10,
+              "order_no": 2,
+              "content_md": "## Hook\nAnda baru saja merilis update API yang menghapus field `username`. Tiba-tiba, aplikasi Mobile dan Frontend error massal karena mereka masih butuh field tersebut. Sebagai Backend Engineer, Anda butuh sistem rilis yang jelas agar pengguna API tidak kaget.\n\n## Konsep\n**Semantic Versioning (SemVer)** menggunakan format `MAJOR.MINOR.PATCH` (misal: `v1.2.3`).\n- **MAJOR**: Perubahan besar yang merusak kompatibilitas (breaking change).\n- **MINOR**: Penambahan fitur baru yang tidak merusak fungsi lama.\n- **PATCH**: Perbaikan bug kecil.\n\n### Git Tags\nTag adalah cara kita memberi label permanen pada sebuah commit sebagai 'Release'. Berbeda dengan branch yang bergerak, tag bersifat statis.\n\n### Changelog Otomatis\nDengan menggabungkan Conventional Commits dan Git Tags, kita bisa membuat file `CHANGELOG.md` otomatis. Tim lain bisa membaca file ini untuk tahu apa yang berubah di versi terbaru tanpa harus membaca kode.\n\n### Cara Membuat Tag\n```bash\n# Membuat tag versi baru\ngit tag -a v1.0.0 -m \"Initial stable release\"\n\n# Mengirim tag ke server\ngit push origin v1.0.0\n```\n\n## Praktik\nBerikan label rilis pada commit terakhir Anda.\n1. Buat tag dengan nama `v1.0.0`.\n2. Pastikan tag tersebut tercatat di repository.\n\n## Ringkasan\n- SemVer membantu komunikasi antar tim.\n- Tag menandai titik rilis penting dalam sejarah repository.\n- Breaking change wajib menaikkan angka Major.\n\n**Cheat Sheet Versioning:**\n- `git tag`: Melihat daftar tag.\n- `git show v1.0.0`: Melihat detail isi rilis v1.0.0.\n- `git tag -d v1.0.0`: Menghapus tag (gunakan dengan hati-hati).",
+              "practice_config": {
+                "scenario": "history",
+                "goal": "Buat tag rilis v1.0.0 pada commit terbaru.",
+                "commands": ["git tag v1.0.0"],
+                "checks": [
+                  { "type": "tag_exists", "value": "v1.0.0", "label": "Tag v1.0.0 berhasil dibuat" }
+                ],
+                "hints": [
+                  "Gunakan perintah 'git tag' diikuti nama versinya.",
+                  "Cukup ketik 'git tag v1.0.0'.",
+                  "Cek apakah sudah ada dengan mengetik 'git tag' saja."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Jika Anda menambahkan endpoint baru tanpa menghapus endpoint lama, bagian mana dari SemVer yang harus dinaikkan?",
+                  "explanation": "Penambahan fitur baru yang bersifat backward-compatible berarti menaikkan angka MINOR (misal v1.0.0 -> v1.1.0).",
+                  "options": [
+                    { "text": "MAJOR", "correct": false },
+                    { "text": "MINOR", "correct": true },
+                    { "text": "PATCH", "correct": false },
+                    { "text": "Build Number", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa perbedaan utama antara Branch dan Tag di Git?",
+                  "explanation": "Branch adalah referensi yang bergerak (berubah saat ada commit baru), sedangkan Tag adalah referensi statis untuk menandai titik rilis.",
+                  "options": [
+                    { "text": "Tag lebih berat daripada Branch.", "correct": false },
+                    { "text": "Branch bisa dihapus, Tag tidak.", "correct": false },
+                    { "text": "Branch bersifat dinamis/bergerak, Tag bersifat statis/permanen.", "correct": true },
+                    { "text": "Tag hanya bisa dibuat di branch main.", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa yang dimaksud dengan 'Breaking Change'?",
+                  "explanation": "Breaking change adalah perubahan yang mengubah kontrak API sehingga aplikasi yang menggunakan API tersebut akan rusak jika tidak segera diupdate.",
+                  "options": [
+                    { "text": "Server yang mati mendadak.", "correct": false },
+                    { "text": "Perubahan yang merusak kompatibilitas dengan versi sebelumnya.", "correct": true },
+                    { "text": "Menghapus komentar di dalam kode.", "correct": false },
+                    { "text": "Mengganti nama variabel internal.", "correct": false }
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "ci-test-go-docker",
+              "title": "CI: Test Go & Build Docker",
+              "estimated_minutes": 11,
+              "order_no": 3,
+              "content_md": "## Hook\nAplikasi Go Anda sudah ditest dan lulus, tapi saat dijalankan di server, ia error karena versi Library di OS server berbeda. Solusinya? **Docker**. Kita bungkus aplikasi beserta lingkungannya, lalu kita build secara otomatis di CI.\n\n## Konsep\nWorkflow Backend CI biasanya lebih kompleks karena melibatkan database test dan build image.\n\n### Langkah CI Backend:\n1. **Setup Go**: Menginstall environment Go (v1.22+).\n2. **Run Tests**: Menjalankan `go test ./...`. Seringkali membutuhkan Docker Service (seperti Postgres/Redis) di dalam GitHub Actions.\n3. **Linting**: Menjalankan `golangci-lint` untuk memastikan kode efisien.\n4. **Build & Push Docker**: Jika test lulus, buat Docker Image dan kirim ke Registry (Docker Hub / GitHub Container Registry).\n\n### Contoh GitHub Action (2026)\n```yaml\nname: Go CI\non:\n  push:\n    branches: [main]\njobs:\n  test-and-build:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-go@v5\n        with:\n          go-version: '1.22'\n      - run: go test -v ./...\n      - name: Build Docker\n        uses: docker/build-push-action@v6\n        with:\n          push: false\n          tags: my-api:latest\n```\n\n### Dockerfile Dasar\n```dockerfile\nFROM golang:1.22-alpine AS builder\nWORKDIR /app\nCOPY . .\nRUN go build -o main ./cmd/api\n\nFROM alpine:latest\nCOPY --from=builder /app/main .\nCMD [\"./main\"]\n```\n\n## Praktik\nSimulasikan penambahan Dockerfile ke repository backend Anda.\n1. Buat file `Dockerfile`.\n2. Lakukan commit file tersebut.\n\n## Ringkasan\n- CI Backend memastikan logika bisnis benar melalui automated testing.\n- Docker menjamin aplikasi berjalan sama di semua lingkungan.\n- Gunakan multi-stage build di Dockerfile untuk memperkecil ukuran image.\n\n**Cheat Sheet CI/Docker:**\n- `docker build -t app .`: Membuat image secara local.\n- `go test ./...`: Menjalankan semua unit test di project Go.",
+              "practice_config": {
+                "scenario": "basic",
+                "goal": "Tambahkan Dockerfile ke repository backend Anda.",
+                "commands": ["touch Dockerfile", "git add Dockerfile", "git commit -m \"chore: add Dockerfile for containerization\""],
+                "checks": [
+                  { "type": "file_committed", "value": "Dockerfile", "label": "File Dockerfile sudah di-commit" }
+                ],
+                "hints": [
+                  "Gunakan perintah 'touch Dockerfile'.",
+                  "Masukkan file ke staging dengan 'git add'.",
+                  "Tulis pesan commit yang menjelaskan bahwa ini untuk Docker."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Apa manfaat utama menggunakan Multi-stage build di Dockerfile?",
+                  "explanation": "Multi-stage build memungkinkan kita hanya menyalin binary hasil compile ke image akhir, sehingga ukuran image jauh lebih kecil dan aman (tidak ada source code di production).",
+                  "options": [
+                    { "text": "Mempercepat koneksi internet.", "correct": false },
+                    { "text": "Menghasilkan ukuran image akhir yang jauh lebih kecil dan bersih.", "correct": true },
+                    { "text": "Agar Docker bisa berjalan tanpa root.", "correct": false },
+                    { "text": "Menghilangkan kebutuhan akan GitHub Actions.", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Action apa yang digunakan untuk setup environment Go di GitHub Actions tahun 2026?",
+                  "explanation": "actions/setup-go@v5 adalah versi terbaru yang direkomendasikan untuk ekosistem Go.",
+                  "options": [
+                    { "text": "actions/go-install@v1", "correct": false },
+                    { "text": "actions/setup-go@v5", "correct": true },
+                    { "text": "google/setup-go@v3", "correct": false },
+                    { "text": "docker/setup-go@v2", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Mengapa kita sebaiknya menjalankan unit test sebelum membangun (build) image Docker?",
+                  "explanation": "Untuk menghemat waktu dan resource. Jika test gagal, tidak ada gunanya membuat image karena image tersebut pasti mengandung bug.",
+                  "options": [
+                    { "text": "Karena Docker tidak mendukung testing.", "correct": false },
+                    { "text": "Agar proses build lebih lama.", "correct": false },
+                    { "text": "Untuk memastikan hanya kode yang valid yang dibungkus ke dalam container.", "correct": true },
+                    { "text": "Supaya kuota Docker Hub tidak habis.", "correct": false }
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "review-pr-keamanan-performa",
+              "title": "Review PR: Keamanan & Performa",
+              "estimated_minutes": 8,
+              "order_no": 4,
+              "content_md": "## Hook\nSeorang rekan kerja mengirim Pull Request berisi fitur pencarian user. Anda melihat ada query SQL mentah: `\"SELECT * FROM users WHERE name = '\" + input + \"'\"`. Jika Anda merge ini, database Anda bisa dihapus oleh hacker lewat SQL Injection. Di sinilah peran krusial Code Review bagi Backend Engineer.\n\n## Konsep\nReview kode backend berfokus pada hal-hal yang tidak terlihat oleh mata user, tapi berdampak fatal bagi sistem.\n\n### Checklist Review Keamanan:\n1. **SQL Injection**: Pastikan menggunakan Prepared Statements atau ORM.\n2. **Sensitive Data**: Jangan biarkan password atau API Key bocor ke log atau repository.\n3. **Authorization**: Cek apakah user A benar-benar punya hak untuk menghapus data milik user B.\n\n### Checklist Review Performa:\n1. **N+1 Query**: Apakah satu request memicu ratusan query ke database?\n2. **Indexing**: Apakah kolom yang digunakan di `WHERE` clause sudah di-index?\n3. **Memory Leak**: Terutama di bahasa seperti Go, periksa penggunaan goroutine yang tidak pernah berhenti.\n\n### Etika Review\nJangan hanya mencari kesalahan. Berikan pujian untuk kode yang bagus dan berikan solusi alternatif untuk kode yang kurang optimal. Gunakan fitur **Suggestions** di GitHub untuk memberikan usulan perubahan kode secara langsung.\n\n## Praktik\nSelesaikan kolaborasi backend dengan menggabungkan fitur yang sudah lolos review.\n1. Pindah ke branch `main`.\n2. Merge branch `feat/secure-auth` ke `main`.\n\n## Ringkasan\n- Code Review adalah pertahanan terakhir sebelum bug masuk ke production.\n- Fokus pada keamanan, performa, dan skalabilitas.\n- Gunakan alat bantu otomatis (Security Scanning) untuk membantu review.\n\n**Cheat Sheet Review:**\n- `git diff --cached`: Melihat apa yang akan di-commit.\n- `git log -p`: Melihat sejarah perubahan beserta detail kodenya.",
+              "practice_config": {
+                "scenario": "branches",
+                "goal": "Merge branch feat/secure-auth ke main setelah review selesai.",
+                "commands": ["git switch main", "git merge feat/secure-auth"],
+                "checks": [
+                  { "type": "branch_merged", "value": "feat/secure-auth", "into": "main", "label": "Branch feat/secure-auth sudah di-merge ke main" },
+                  { "type": "head_branch", "value": "main", "label": "Berada di branch main" }
+                ],
+                "hints": [
+                  "Gunakan switch untuk kembali ke branch utama.",
+                  "Jalankan perintah merge untuk menggabungkan fitur.",
+                  "Jika ada konflik, selesaikan terlebih dahulu (namun di skenario ini harusnya mulus)."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Apa risiko utama dari query SQL yang menggabungkan string langsung dari input user?",
+                  "explanation": "Ini adalah celah SQL Injection di mana hacker bisa memanipulasi query untuk mengambil atau menghapus data sensitif.",
+                  "options": [
+                    { "text": "Query menjadi lebih lambat.", "correct": false },
+                    { "text": "SQL Injection yang membahayakan keamanan database.", "correct": true },
+                    { "text": "Database akan otomatis restart.", "correct": false },
+                    { "text": "Ukuran file SQL menjadi lebih besar.", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa yang dimaksud dengan masalah N+1 dalam query database?",
+                  "explanation": "N+1 terjadi saat aplikasi mengambil satu set data utama, lalu melakukan satu query tambahan untuk setiap item di set tersebut, yang sangat tidak efisien.",
+                  "options": [
+                    { "text": "Menambah satu kolom di database.", "correct": false },
+                    { "text": "Ketidakefisienan di mana aplikasi memanggil query berulang kali di dalam loop.", "correct": true },
+                    { "text": "Menjalankan database di dua server berbeda.", "correct": false },
+                    { "text": "Query yang memakan waktu lebih dari 1 detik.", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Hal apa yang paling penting diperiksa pada Pull Request backend terkait data sensitif?",
+                  "explanation": "Password, API Key, dan token rahasia tidak boleh tersimpan dalam kode (plain text) atau ter-commit ke repository.",
+                  "options": [
+                    { "text": "Apakah nama variabel menggunakan Bahasa Inggris.", "correct": false },
+                    { "text": "Apakah ada hardcoded credentials atau secret key di dalam kode.", "correct": true },
+                    { "text": "Apakah ada baris kode yang kosong.", "correct": false },
+                    { "text": "Warna tema editor yang digunakan developer.", "correct": false }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "cheatsheet": [
+    {
+      "category": "Deploy",
+      "command": "git remote add origin <url>",
+      "description": "Menghubungkan repository lokal dengan repository remote.",
+      "example": "git remote add origin https://github.com/user/repo.git"
+    },
+    {
+      "category": "Deploy",
+      "command": "git push -u origin <branch>",
+      "description": "Mengirim commit ke remote dan mengatur tracking branch default.",
+      "example": "git push -u origin main"
+    },
+    {
+      "category": "Release",
+      "command": "git tag -a <version> -m <msg>",
+      "description": "Membuat tag rilis berlabel (annotated tag).",
+      "example": "git tag -a v1.0.0 -m \"Release stable version\""
+    },
+    {
+      "category": "Release",
+      "command": "git push origin --tags",
+      "description": "Mengirim semua tag lokal ke server remote.",
+      "example": "git push origin --tags"
+    },
+    {
+      "category": "Review",
+      "command": "git diff <base>..<head>",
+      "description": "Melihat perbedaan kode antar dua branch.",
+      "example": "git diff main..feat-ui"
+    },
+    {
+      "category": "CI",
+      "command": "git add .github/workflows/*.yml",
+      "description": "Menambahkan file konfigurasi CI/CD ke staging.",
+      "example": "git add .github/workflows/ci.yml"
+    },
+    {
+      "category": "Review",
+      "command": "git log --graph --oneline",
+      "description": "Melihat sejarah commit dalam bentuk grafik satu baris.",
+      "example": "git log --graph --oneline --all"
+    },
+    {
+      "category": "History",
+      "command": "git commit --amend",
+      "description": "Mengubah pesan atau isi commit terakhir yang belum di-push.",
+      "example": "git commit --amend -m \"feat: new message\""
+    },
+    {
+      "category": "Review",
+      "command": "git merge --no-ff <branch>",
+      "description": "Merge branch dengan tetap membuat merge commit (mencegah fast-forward).",
+      "example": "git merge --no-ff feat-login"
+    },
+    {
+      "category": "History",
+      "command": "git rebase -i HEAD~3",
+      "description": "Melakukan interactive rebase pada 3 commit terakhir.",
+      "example": "git rebase -i HEAD~3"
+    }
+  ]
+}

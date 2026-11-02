@@ -1,0 +1,59 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: gitlearn
+      MYSQL_USER: gitlearn
+      MYSQL_PASSWORD: gitlearn
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u gitlearn -pgitlearn --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  migrate:
+    build: ./backend
+    command: ["/migrate", "-dir", "/migrations"]
+    environment:
+      DB_DSN: gitlearn:gitlearn@tcp(mysql:3306)/gitlearn?parseTime=true&multiStatements=true&charset=utf8mb4
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  seed:
+    build: ./backend
+    command: ["/seed", "-dir", "/seeds"]
+    environment:
+      DB_DSN: gitlearn:gitlearn@tcp(mysql:3306)/gitlearn?parseTime=true&multiStatements=true&charset=utf8mb4
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  api:
+    build: ./backend
+    environment:
+      APP_ENV: production
+      PORT: 8080
+      DB_DSN: gitlearn:gitlearn@tcp(mysql:3306)/gitlearn?parseTime=true&multiStatements=true&charset=utf8mb4
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      CORS_ORIGINS: http://localhost:5173,http://localhost:8081
+    ports:
+      - "8080:8080"
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+
+  web:
+    build: ./frontend
+    ports:
+      - "8081:80"
+    depends_on:
+      - api
+
+volumes:
+  mysql_data:

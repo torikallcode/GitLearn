@@ -1,0 +1,13 @@
+DROP TABLE IF EXISTS cheatsheet_items;
+DROP TABLE IF EXISTS user_badges;
+DROP TABLE IF EXISTS badges;
+DROP TABLE IF EXISTS user_stats;
+DROP TABLE IF EXISTS review_queue;
+DROP TABLE IF EXISTS quiz_attempts;
+DROP TABLE IF EXISTS user_lesson_progress;
+DROP TABLE IF EXISTS quiz_options;
+DROP TABLE IF EXISTS quizzes;
+DROP TABLE IF EXISTS lessons;
+DROP TABLE IF EXISTS modules;
+DROP TABLE IF EXISTS learning_paths;
+DROP TABLE IF EXISTS users;

@@ -1,0 +1,688 @@
+{
+  "paths": [
+    {
+      "slug": "github-collaboration",
+      "title": "GitHub Collaboration",
+      "description": "Lanjut dari Git dasar ke kerja tim nyata di GitHub: repository dan README, autentikasi SSH/PAT, fork dan pull request, code review, merge conflict, issue, GitHub Projects, serta kontribusi open source yang sehat.",
+      "order_no": 2,
+      "track": "collab",
+      "modules": [
+        {
+          "title": "GitHub Basics",
+          "description": "Menyiapkan repository tim yang rapi dan menghubungkan laptop ke GitHub dengan autentikasi yang aman.",
+          "order_no": 6,
+          "lessons": [
+            {
+              "slug": "github-repository-readme",
+              "title": "Repository GitHub & README",
+              "estimated_minutes": 7,
+              "order_no": 1,
+              "content_md": "## Hook\n\nHari pertama Dimas di tim frontend, ia membuka repository `frontend-app` milik timnya. Folder `src` penuh kode, tetapi tidak ada penjelasan cara menjalankan aplikasi. Ia menghabiskan hampir satu hari menebak versi Node, nama environment variable, dan perintah test. Semua masalah itu sebenarnya bisa selesai dengan satu file: README.\n\n## Konsep\n\nRepository GitHub adalah salinan proyek yang hidup di server GitHub. Anggota tim meng-clone-nya ke laptop, membuat perubahan, lalu mengirimnya kembali lewat push. Repository bisa **public** (siapa pun dapat membaca) atau **private** (hanya kolaborator yang diundang).\n\n`README.md` adalah halaman depan repository. GitHub merendernya otomatis di bawah daftar file, jadi orang melihatnya sebelum membaca kode. README yang baik menjawab tiga hal: proyek ini apa, cara menjalankannya, dan cara berkontribusi.\n\nStruktur minimal sebuah repo frontend:\n\n```text\nfrontend-app/\n├── README.md\n├── package.json\n└── src/\n```\n\nMembuat repository baru di GitHub:\n\n1. Klik **New repository**.\n2. Isi nama, misalnya `frontend-app`, lalu pilih visibility.\n3. Centang **Add a README file** agar repo tidak kosong.\n4. Klik **Create repository**.\n\nContoh README yang berguna:\n\n````md\n# Frontend App\n\nAplikasi kasir untuk tim operasional.\n\n## Menjalankan\n\n```bash\nnpm install\nnpm run dev\n```\n\n## Testing\n\nnpm test\n````\n\nBagian Testing penting karena reviewer dan CI akan menjalankannya; tulis perintah yang benar-benar ada di `package.json`. Sertakan badge CI, tautan desain, dan catatan versi Node bila perlu. Jangan pernah menaruh token atau password di README karena isinya terbaca oleh semua kolaborator. Untuk repo private, undang rekan lewat **Settings → Collaborators** dengan role yang sesuai, misalnya Read atau Write.\n\n## Praktik\n\nSandbox berisi repository tim yang sudah terhubung ke remote. Clone repo tersebut, tambahkan bagian Testing pada README, lalu kirim perubahan.\n\n```bash\ngit clone git@github.com:tim/frontend-app.git\ncd frontend-app\n```\n\nBuka `README.md`, tambahkan penjelasan cara menjalankan test, lalu jalankan:\n\n```bash\ngit add README.md\ngit commit -m 'docs: jelaskan cara menjalankan test'\ngit push\n```\n\nBuka halaman repository di GitHub dan pastikan README baru sudah tampil. Jika push ditolak, baca pesan errornya sebelum mencoba force push.\n\n## Ringkasan\n\n- Repository adalah rumah proyek di GitHub; clone mengambil salinannya ke laptop.\n- README adalah dokumentasi pertama yang dibaca orang, termasuk dirimu enam bulan nanti.\n- Perubahan dokumentasi tetap melewati add, commit, dan push.\n\n**Cheat sheet:** `git clone <url>` mengambil repo, lalu `git add README.md`, `git commit -m 'docs: ...'`, dan `git push` mengirim perbaikannya.",
+              "practice_config": {
+                "scenario": "remote",
+                "goal": "Clone repository tim, perbarui README dengan bagian Testing, lalu push perubahan ke remote.",
+                "commands": ["git clone git@github.com:tim/frontend-app.git", "git add README.md", "git commit -m 'docs: jelaskan cara menjalankan test'", "git push"],
+                "checks": [
+                  { "type": "command_used", "value": "git clone", "label": "Repository berhasil di-clone" },
+                  { "type": "file_committed", "value": "README.md", "label": "README.md ada di commit terbaru" },
+                  { "type": "command_used", "value": "git push", "label": "Perubahan dikirim ke remote" },
+                  { "type": "clean_worktree", "label": "Working tree bersih setelah push" }
+                ],
+                "hints": [
+                  "Mulai dengan mengambil salinan repository tim ke laptopmu.",
+                  "Setelah mengubah README, stage file itu saja agar commit tetap fokus.",
+                  "Urutannya: git clone, edit README.md, git add README.md, git commit -m 'docs: ...', git push."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Di mana GitHub menampilkan isi README.md secara otomatis?",
+                  "explanation": "GitHub merender README di halaman utama repository, tepat di bawah daftar file. Ini alasan README menjadi dokumentasi pertama yang dibaca. Kesalahan umum adalah mengira README hanya terlihat setelah file dibuka satu per satu.",
+                  "options": [
+                    { "text": "Di halaman utama repository, di bawah daftar file", "correct": true },
+                    { "text": "Hanya di tab Issues", "correct": false },
+                    { "text": "Hanya di halaman Settings repository", "correct": false },
+                    { "text": "Di branch protection rules", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa perbedaan utama repository public dan private di GitHub?",
+                  "explanation": "Public dapat dibaca siapa saja, sedangkan private hanya dapat diakses akun yang diundang sebagai collaborator. Kesalahan umum: menganggap private otomatis aman untuk menyimpan secret. Token tetap tidak boleh di-commit ke repo mana pun.",
+                  "options": [
+                    { "text": "Public dapat dibaca siapa saja; private hanya oleh collaborator yang diundang", "correct": true },
+                    { "text": "Public tidak mendukung README", "correct": false },
+                    { "text": "Private tidak bisa di-clone", "correct": false },
+                    { "text": "Private hanya bisa diakses lewat browser, bukan Git", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Perintah mana yang mengambil salinan repository GitHub ke laptop beserta riwayat commit-nya?",
+                  "explanation": "git clone menyalin repository beserta seluruh history dan menyetel remote origin. git pull hanya memperbarui repo yang sudah ada, sedangkan git fetch tidak menggabungkan perubahan. Menjalankan clone di folder yang sudah berisi repo lain adalah pitfall umum.",
+                  "options": [
+                    { "text": "git clone <url>", "correct": true },
+                    { "text": "git pull <url>", "correct": false },
+                    { "text": "git fetch <url>", "correct": false },
+                    { "text": "git remote -v", "correct": false }
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "ssh-https-dan-token",
+              "title": "SSH, HTTPS, dan Personal Access Token",
+              "estimated_minutes": 8,
+              "order_no": 2,
+              "content_md": "## Hook\n\nSari mengetik `git push`, lalu terminal meminta username dan password. Setelah password GitHub dimasukkan, muncul pesan: **Support for password authentication was removed on August 13, 2021**. Ia mengira akunnya diretas. Padahal GitHub memang tidak lagi menerima password akun untuk operasi Git.\n\n## Konsep\n\nAda dua cara aman terhubung ke GitHub: **HTTPS dengan Personal Access Token (PAT)** atau **SSH key**.\n\nPada HTTPS, URL remote berbentuk `https://github.com/tim/backend-api.git`. Saat diminta password, isi dengan PAT, bukan password akun. Classic PAT cukup dengan scope `repo`; fine-grained PAT lebih aman karena bisa dibatasi ke repository dan permission tertentu, misalnya Contents: Read and write. Simpan token lewat credential helper agar tidak diketik berulang:\n\n```bash\ngit config --global credential.helper manager\n```\n\nDi macOS gunakan `osxkeychain`, di Linux `libsecret`. Token tetap punya masa berlaku dan bisa dicabut kapan saja. Jangan pernah menaruhnya di kode, `.env` yang di-commit, atau URL remote.\n\nPada SSH, kamu membuat pasangan kunci: private key di laptop dan public key di GitHub. Buat dengan:\n\n```bash\nssh-keygen -t ed25519 -C 'sari@example.com'\n```\n\nUnggah isi file `~/.ssh/id_ed25519.pub` ke **Settings → SSH and GPG keys → New SSH key**. Private key `id_ed25519` tidak boleh dibagikan atau di-commit. Uji koneksi:\n\n```bash\nssh -T git@github.com\n```\n\nJika berhasil, muncul sapaan seperti `Hi sari! You've successfully authenticated`. URL remote SSH berbentuk `git@github.com:tim/backend-api.git`.\n\nMengganti remote dari HTTPS ke SSH:\n\n```bash\ngit remote -v\ngit remote set-url origin git@github.com:tim/backend-api.git\ngit push\n```\n\nKalau memakai organisasi dengan SSO, PAT atau SSH key harus diotorisasi pada organisasi tersebut. Token yang bocor harus langsung di-revoke dari Settings, lalu diganti baru; menghapusnya dari commit terakhir saja tidak cukup karena masih ada di history.\n\n## Praktik\n\nSandbox berisi repo dengan remote `origin` ber-URL HTTPS. Periksa remote, ubah ke SSH, lalu pastikan push berhasil.\n\n```bash\ngit remote -v\ngit remote set-url origin git@github.com:tim/backend-api.git\ngit push\n```\n\nBaca output `git remote -v`: pastikan baris fetch dan push sama-sama memakai URL SSH. Di dunia nyata, setelah `set-url` kamu juga menjalankan `ssh -T git@github.com` untuk memastikan kunci sudah terpasang.\n\n## Ringkasan\n\n- Password akun tidak dipakai untuk Git; gunakan PAT atau SSH key.\n- Public key boleh dibagikan, private key tidak pernah.\n- `git remote -v` memeriksa URL, `git remote set-url` menggantinya.\n\n**Cheat sheet:** `ssh-keygen -t ed25519 -C 'email'` → unggah `.pub` → `ssh -T git@github.com`; untuk HTTPS, isi prompt password dengan PAT.",
+              "practice_config": {
+                "scenario": "remote",
+                "goal": "Periksa remote yang ada, ubah URL origin dari HTTPS ke SSH, lalu push untuk memastikan koneksi siap.",
+                "commands": ["git remote -v", "git remote set-url origin git@github.com:tim/backend-api.git", "git push"],
+                "checks": [
+                  { "type": "command_used", "value": "git remote -v", "label": "Remote diperiksa terlebih dahulu" },
+                  { "type": "command_used", "value": "set-url", "label": "URL origin diubah ke SSH" },
+                  { "type": "command_used", "value": "git push", "label": "Push dilakukan setelah perubahan remote" }
+                ],
+                "hints": [
+                  "Lihat dulu remote apa yang terpasang sebelum mengubah apa pun.",
+                  "Gunakan git remote set-url dengan URL berbentuk git@github.com:owner/repo.git.",
+                  "Urutannya: git remote -v, git remote set-url origin git@github.com:tim/backend-api.git, lalu git push."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Mengapa password akun GitHub ditolak saat git push lewat HTTPS?",
+                  "explanation": "Sejak 13 Agustus 2021 GitHub menghentikan autentikasi password untuk operasi Git. Penggantinya adalah Personal Access Token atau SSH key. Kesalahan umum adalah mengira akun terkunci lalu mengganti password berulang kali.",
+                  "options": [
+                    { "text": "GitHub hanya menerima PAT atau SSH key untuk operasi Git", "correct": true },
+                    { "text": "Password harus lebih dari 20 karakter", "correct": false },
+                    { "text": "HTTPS tidak didukung GitHub", "correct": false },
+                    { "text": "Repository harus public terlebih dahulu", "correct": false }
+                  ]
+                },
+                {
+                  "question": "File mana yang diunggah ke GitHub saat memasang SSH key?",
+                  "explanation": "Yang diunggah adalah public key, yaitu file berakhiran .pub. Private key tetap di laptop dan tidak boleh dibagikan. Kesalahan fatal adalah menempelkan isi id_ed25519 tanpa .pub ke GitHub atau meng-commit private key.",
+                  "options": [
+                    { "text": "Public key, misalnya id_ed25519.pub", "correct": true },
+                    { "text": "Private key, misalnya id_ed25519", "correct": false },
+                    { "text": "File known_hosts", "correct": false },
+                    { "text": "File config repository", "correct": false }
+                  ]
+                },
+                {
+                  "question": "PAT terlanjur ter-commit ke repository public. Tindakan paling tepat adalah…",
+                  "explanation": "Revoke token segera karena siapa pun bisa memakainya, lalu buat token baru dan bersihkan history dengan git filter-repo atau BFG. Menghapus file di commit berikutnya tidak menghilangkan token dari history. Mengabaikannya berisiko akses tidak sah.",
+                  "options": [
+                    { "text": "Revoke token di Settings, buat token baru, lalu bersihkan history repository", "correct": true },
+                    { "text": "Cukup hapus file token di commit berikutnya", "correct": false },
+                    { "text": "Ganti nama repository agar token tidak berlaku", "correct": false },
+                    { "text": "Biarkan karena repository akan di-archive", "correct": false }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Pull Request",
+          "description": "Alur fork, membuka pull request yang mudah di-review, dan memilih strategi merge yang sesuai kebiasaan tim.",
+          "order_no": 7,
+          "lessons": [
+            {
+              "slug": "fork-dan-pull-request",
+              "title": "Fork & Pull Request",
+              "estimated_minutes": 8,
+              "order_no": 1,
+              "content_md": "## Hook\n\nRina menemukan typo di dokumentasi sebuah proyek open source. Ia sudah memperbaikinya di laptop, tetapi `git push` ditolak: **403 Permission denied**. Ia bukan collaborator repository itu. Solusinya bukan meminta akses admin, melainkan fork dan pull request.\n\n## Konsep\n\n**Fork** adalah salinan repository orang lain di akunmu. Fork punya history sendiri dan kamu bebas mendorong branch ke sana. Ini berbeda dari **branch**, yang berada di dalam satu repository dan hanya bisa dipush oleh orang dengan akses tulis.\n\nAlur kontribusi lewat fork:\n\n1. Klik **Fork** di halaman repository, lalu clone fork milikmu.\n2. Tambahkan repository asli sebagai remote `upstream`.\n3. Buat branch baru dari `main` yang terbaru.\n4. Commit perubahan kecil dan fokus, lalu push ke fork.\n5. Klik **Compare & pull request** di GitHub.\n\nPull request (PR) adalah permintaan menggabungkan branch di head repository (fork-mu) ke branch di base repository (repo asli). PR bukan sekadar tombol merge: di sanalah diskusi, review, dan CI berjalan.\n\nBanyak tim menyediakan PR template di `.github/pull_request_template.md`. Template ini muncul otomatis saat PR dibuat dan biasanya meminta ringkasan perubahan, issue terkait, langkah pengujian, serta screenshot untuk perubahan UI. Isi dengan jujur; reviewer tidak punya konteks di kepalamu.\n\nJudul PR sebaiknya spesifik, misalnya `fix: redirect ke dashboard setelah login`, bukan `update`. Kaitkan issue dengan `Closes #12` agar tertutup otomatis saat PR di-merge. Gunakan **Draft pull request** bila pekerjaan belum siap di-review. Satu PR sebaiknya menyelesaikan satu tujuan; PR raksasa sulit di-review dan rawan konflik.\n\n## Praktik\n\nSandbox mensimulasikan fork yang sudah di-clone. Buat branch fitur, commit perubahan, lalu push branch ke remote fork.\n\n```bash\ngit switch -c feat/login-form\ngit add src/login.js\ngit commit -m 'feat: tambah form login'\ngit push -u origin feat/login-form\n```\n\nFlag `-u` menyetel upstream branch sehingga `git push` berikutnya cukup tanpa argumen. Setelah push, buka GitHub dan bandingkan branch `feat/login-form` di fork dengan `main` di repo asli. Perhatikan file yang berubah sebelum menekan **Create pull request**.\n\n## Ringkasan\n\n- Fork adalah salinan repo di akunmu; branch adalah cabang di dalam repo.\n- PR meminta merge dari branch head ke branch base dan menjadi tempat review.\n- Branch fitur yang jelas, commit kecil, dan deskripsi PR yang lengkap mempercepat review.\n\n**Cheat sheet:** `gh repo fork owner/repo --clone` → `git remote add upstream <url>` → `git switch -c feat/...` → `git push -u origin feat/...` → buka PR.",
+              "practice_config": {
+                "scenario": "remote",
+                "goal": "Buat branch fitur dari fork yang sudah di-clone, commit perubahan, lalu push branch tersebut ke origin.",
+                "commands": ["git switch -c feat/login-form", "git add src/login.js", "git commit -m 'feat: tambah form login'", "git push -u origin feat/login-form"],
+                "checks": [
+                  { "type": "branch_exists", "value": "feat/login-form", "label": "Branch feat/login-form dibuat" },
+                  { "type": "head_branch", "value": "feat/login-form", "label": "HEAD berada di branch fitur" },
+                  { "type": "commit_message_contains", "value": "form login", "label": "Commit menjelaskan perubahan form login" },
+                  { "type": "remote_branch_exists", "value": "feat/login-form", "remote": "origin", "label": "Branch fitur tersedia di remote origin" }
+                ],
+                "hints": [
+                  "Jangan commit langsung di main; buat branch dengan nama yang menjelaskan fitur.",
+                  "Stage hanya file yang relevan dengan form login.",
+                  "Gunakan git push -u origin feat/login-form agar branch terhubung ke remote."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Apa fungsi fork dalam alur kontribusi open source?",
+                  "explanation": "Fork membuat salinan repository di akunmu sehingga kamu punya hak tulis untuk mendorong branch. Branch tidak memberi hak tulis di repo orang lain. Kesalahan umum adalah mengira fork otomatis mengubah repository asli.",
+                  "options": [
+                    { "text": "Membuat salinan repository di akunmu agar bisa mendorong branch dan mengajukan PR", "correct": true },
+                    { "text": "Menggabungkan branch ke main secara otomatis", "correct": false },
+                    { "text": "Menghapus history repository asli", "correct": false },
+                    { "text": "Memberi kamu akses admin ke repository asli", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Untuk apa remote bernama upstream ditambahkan saat bekerja dari fork?",
+                  "explanation": "Upstream menunjuk ke repository asli agar kamu bisa mengambil pembaruan maintainer dan menyinkronkan branch sebelum PR. Origin tetap menunjuk ke fork milikmu. Pitfall umum: menukar origin dan upstream sehingga push tidak sengaja diarahkan ke repo orang lain.",
+                  "options": [
+                    { "text": "Menunjuk ke repository asli untuk mengambil pembaruan maintainer", "correct": true },
+                    { "text": "Menggantikan origin agar push langsung ke repo asli", "correct": false },
+                    { "text": "Menyimpan token autentikasi", "correct": false },
+                    { "text": "Menghapus fork setelah PR di-merge", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Di mana PR template biasanya diletakkan agar muncul otomatis di GitHub?",
+                  "explanation": "GitHub mencari template di .github/pull_request_template.md, atau di root serta folder docs dengan nama serupa. File ini membantu menjaga informasi PR konsisten. Kesalahan umum: menaruhnya di folder src atau menamainya README.md.",
+                  "options": [
+                    { "text": ".github/pull_request_template.md", "correct": true },
+                    { "text": "src/pull_request.md", "correct": false },
+                    { "text": "README.md di branch fitur", "correct": false },
+                    { "text": ".git/pull_request_template.md", "correct": false }
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "code-review-dan-merge-strategy",
+              "title": "Code Review & Strategi Merge",
+              "estimated_minutes": 9,
+              "order_no": 2,
+              "content_md": "## Hook\n\nSebuah PR berisi 38 file: refactor folder, rename komponen, tambah fitur checkout, dan update dependency. Reviewer hanya melihat judulnya lalu menekan **Approve**. Dua hari kemudian bug masuk production karena satu perubahan kecil terlewat. PR besar bukan tanda produktivitas; ia tanda review tidak akan pernah benar-benar terjadi.\n\n## Konsep\n\nCode review adalah percakapan tentang perubahan, bukan penilaian pribadi. Di GitHub, reviewer dapat memberi **Comment**, **Approve**, atau **Request changes**. Kamu bisa memberi komentar per baris dan memakai **suggestion** agar penulis dapat menerapkan perbaikan langsung. Setelah dibahas, conversation ditandai resolved.\n\nBanyak tim mengaktifkan branch protection: minimal satu approval, status check CI hijau, dan conversation harus resolved sebelum merge. CODEOWNERS bisa otomatis meminta review dari pemilik folder, misalnya tim frontend untuk `src/components/`.\n\nTiga strategi merge yang utama:\n\n- **Create a merge commit** — mempertahankan semua commit dan menambah merge commit. Riwayat bercabang, tetapi jejak kerja utuh. Cocok untuk branch fitur besar.\n- **Squash and merge** — menggabungkan semua commit PR menjadi satu commit di `main`. History bersih dan mudah di-revert, tetapi commit kecil penulis hilang.\n- **Rebase and merge** — memindahkan commit satu per satu tanpa merge commit. History linear, namun SHA ditulis ulang; hindari pada branch yang sudah dipakai orang lain.\n\nPilihan strategi adalah kebijakan tim, bukan soal benar-salah. Saat memilih, tanyakan apakah tim perlu melihat commit perbaikan individual ketika investigasi bug. Jika ya, merge commit lebih aman; jika yang dibutuhkan riwayat `main` yang mudah dibaca, squash sering menjadi pilihan. Yang penting konsisten dan dicatat di CONTRIBUTING. Setelah merge, hapus branch fitur agar daftar branch tidak menumpuk.\n\n## Praktik\n\nSandbox berisi branch `feature/checkout` yang sudah siap. Pindah ke `main`, merge dengan merge commit eksplisit agar titik integrasi terlihat, lalu hapus branch fiturnya.\n\n```bash\ngit switch main\ngit merge --no-ff feature/checkout -m 'merge: fitur checkout'\ngit branch -d feature/checkout\n```\n\nPerhatikan graph: `--no-ff` memaksa merge commit meskipun sebenarnya bisa fast-forward. Ini memudahkan orang melihat kapan fitur masuk ke `main`. Di GitHub, hasil yang sama terlihat sebagai commit merge dari tombol **Merge pull request**.\n\n## Ringkasan\n\n- Review berfokus pada kode dan konteks, bukan orangnya.\n- Merge commit menjaga jejak, squash merapikan history, rebase membuat garis lurus.\n- Branch protection dan CODEOWNERS membantu menjaga kualitas tanpa mengandalkan ingatan.\n\n**Cheat sheet:** `gh pr review 42 --approve` menyetujui; `gh pr merge 42 --squash --delete-branch` menggabungkan sekaligus merapikan branch.",
+              "practice_config": {
+                "scenario": "branches",
+                "goal": "Merge branch feature/checkout ke main dengan merge commit eksplisit, lalu hapus branch fitur yang sudah selesai.",
+                "commands": ["git switch main", "git merge --no-ff feature/checkout -m 'merge: fitur checkout'", "git branch -d feature/checkout"],
+                "checks": [
+                  { "type": "head_branch", "value": "main", "label": "HEAD berada di main" },
+                  { "type": "branch_merged", "value": "feature/checkout", "into": "main", "label": "feature/checkout sudah masuk ke main" },
+                  { "type": "branch_not_exists", "value": "feature/checkout", "label": "Branch fitur sudah dihapus" },
+                  { "type": "command_used", "value": "--no-ff", "label": "Merge memakai --no-ff" }
+                ],
+                "hints": [
+                  "Pindah ke branch tujuan sebelum melakukan merge.",
+                  "Gunakan --no-ff agar merge commit tetap dibuat.",
+                  "Setelah merge, hapus branch dengan git branch -d, bukan -D, supaya Git memastikan branch sudah tergabung."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Apa efek utama Squash and merge pada sebuah PR?",
+                  "explanation": "Squash menggabungkan seluruh commit PR menjadi satu commit di branch tujuan, sehingga history lebih ringkas. Commit individual penulis tidak dipertahankan. Kesalahan umum adalah mengira squash mempertahankan semua commit asli.",
+                  "options": [
+                    { "text": "Semua commit PR digabung menjadi satu commit di branch tujuan", "correct": true },
+                    { "text": "Semua commit dihapus tanpa jejak", "correct": false },
+                    { "text": "Branch tujuan ikut dihapus", "correct": false },
+                    { "text": "Setiap commit diubah menjadi branch baru", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa arti tombol Request changes pada review PR?",
+                  "explanation": "Request changes menandakan PR belum bisa di-merge sampai perubahan tertentu dikerjakan dan review ulang dilakukan, tergantung aturan branch protection. Ini bukan penolakan permanen. Kesalahan umum: menandainya sebagai approve lalu berharap penulis membaca komentar.",
+                  "options": [
+                    { "text": "PR perlu diperbaiki sebelum layak di-merge", "correct": true },
+                    { "text": "PR langsung di-merge otomatis", "correct": false },
+                    { "text": "PR dihapus dari repository", "correct": false },
+                    { "text": "Branch fitur dikunci permanen", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa fungsi opsi --no-ff saat git merge?",
+                  "explanation": "--no-ff selalu membuat merge commit meskipun merge bisa dilakukan fast-forward, sehingga titik integrasi fitur tercatat. Tanpa opsi ini, history bisa tampak linear tanpa merge commit. Pitfall: mengira --no-ff menggandakan commit fitur.",
+                  "options": [
+                    { "text": "Memaksa pembuatan merge commit agar titik integrasi terlihat", "correct": true },
+                    { "text": "Membatalkan merge yang sedang berjalan", "correct": false },
+                    { "text": "Menghapus branch sumber setelah merge", "correct": false },
+                    { "text": "Mengabaikan semua konflik secara otomatis", "correct": false }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Merge Conflict",
+          "description": "Memahami kenapa konflik muncul, membaca marker dengan benar, dan menyelesaikannya tanpa merusak pekerjaan rekan tim.",
+          "order_no": 8,
+          "lessons": [
+            {
+              "slug": "penyebab-merge-conflict",
+              "title": "Kenapa Merge Conflict Terjadi?",
+              "estimated_minutes": 7,
+              "order_no": 1,
+              "content_md": "## Hook\n\nDimas mengubah validasi email di `src/app.js`, sementara Sari mengubah baris yang sama untuk menambah aturan nomor telepon. Keduanya bekerja di branch berbeda dan tidak pernah saling memberi tahu. Saat Dimas merge, Git berhenti dan menampilkan `CONFLICT (content): Merge conflict in src/app.js`. Ia panik karena mengira kodenya rusak.\n\n## Konsep\n\nMerge conflict bukan error atau tanda repository rusak. Git adalah alat yang sangat baik menggabungkan perubahan di baris berbeda, tetapi ketika dua branch mengubah **baris yang sama** dengan cara berbeda, Git tidak punya dasar untuk memilih. Git berhenti dan meminta manusia memutuskan.\n\nSaat merge, Git membandingkan tiga titik:\n\n- **base** — commit leluhur bersama sebelum kedua branch berubah.\n- **ours** — versi branch tempat kamu berada, biasanya `main`.\n- **theirs** — versi branch yang sedang di-merge.\n\nGit menandai bagian yang bentrok dengan marker:\n\n```text\n<<<<<<< HEAD\nconst email = input.email.trim();\n=======\nconst email = input.email.trim().toLowerCase();\nconst phone = normalizePhone(input.phone);\n>>>>>>> feature/validasi-kontak\n```\n\n`<<<<<<< HEAD` menandai versi ours, `=======` pemisah, dan `>>>>>>> nama-branch` menandai versi theirs. Marker ini harus dihapus setelah kamu memilih atau menggabungkan isi keduanya.\n\nKonflik sering terjadi karena: dua orang menyunting baris yang sama, satu branch menghapus file yang di branch lain diubah, rename file bersamaan, atau file biner berubah di kedua sisi. Konflik lebih jarang jika PR kecil, branch berumur pendek, dan kamu rutin menarik `main` terbaru sebelum mulai bekerja.\n\nPencegahan yang realistis: bagi kepemilikan file, hindari refactor massal bersamaan dengan fitur, tarik perubahan tiap pagi, dan komunikasikan perubahan besar di channel tim. Format on save yang berbeda juga bisa memicu konflik palsu di seluruh file.\n\n## Praktik\n\nSandbox dimulai dalam keadaan konflik pada `src/app.js`. Periksa status, buka file, pilih gabungan perubahan yang benar, hapus marker, lalu selesaikan merge dengan commit.\n\n```bash\ngit status\n# edit src/app.js: pertahankan validasi email dan telepon, hapus marker\ngit add src/app.js\ngit commit -m 'resolve: gabungkan validasi email dan telepon'\n```\n\n`git status` akan menandai file sebagai `both modified`. Setelah `git add`, file dianggap selesai dan Git mengizinkan commit penutup merge. Pastikan working tree bersih di akhir.\n\n## Ringkasan\n\n- Konflik muncul saat perubahan tidak bisa digabung otomatis, bukan karena Git rusak.\n- Git menunjukkan versi ours dan theirs lewat marker.\n- Branch pendek, PR kecil, dan sering menarik `main` menekan risiko konflik.\n\n**Cheat sheet:** `git status` melihat file konflik; `<<<<<<< HEAD` = ours, `=======` = pemisah, `>>>>>>> branch` = theirs.",
+              "practice_config": {
+                "scenario": "conflict",
+                "goal": "Selesaikan konflik pada src/app.js dengan menggabungkan kedua perubahan, lalu tutup merge dengan commit.",
+                "commands": ["git status", "git add src/app.js", "git commit -m 'resolve: gabungkan validasi email dan telepon'"],
+                "checks": [
+                  { "type": "conflict_resolved", "value": "src/app.js", "label": "Konflik di src/app.js sudah diselesaikan" },
+                  { "type": "clean_worktree", "label": "Working tree bersih setelah commit" },
+                  { "type": "commit_message_contains", "value": "resolve", "label": "Commit penutup merge menjelaskan resolusi" }
+                ],
+                "hints": [
+                  "Mulai dengan git status untuk melihat file mana yang bentrok.",
+                  "Buka src/app.js, pilih atau gabungkan kedua versi, lalu hapus semua baris marker.",
+                  "Setelah file benar, jalankan git add src/app.js lalu git commit untuk menutup merge."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Apa yang ditandai oleh baris <<<<<<< HEAD dalam sebuah file konflik?",
+                  "explanation": "HEAD menunjuk ke branch tempat kamu melakukan merge, sehingga bagian itu adalah versi ours. Versi branch yang masuk berada setelah =======. Kesalahan umum: mengira HEAD adalah versi branch yang sedang di-merge.",
+                  "options": [
+                    { "text": "Awal versi branch saat ini (ours) yang sedang aktif", "correct": true },
+                    { "text": "Awal versi branch yang sedang di-merge (theirs)", "correct": false },
+                    { "text": "Commit paling lama di repository", "correct": false },
+                    { "text": "Baris yang otomatis dihapus Git", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Kapan Git biasanya melaporkan merge conflict?",
+                  "explanation": "Konflik muncul ketika kedua branch mengubah bagian yang sama dengan isi berbeda, atau terjadi perubahan yang bertabrakan seperti hapus versus ubah. Perubahan di file berbeda biasanya digabung otomatis. Pitfall: menyalahkan Git untuk konflik yang sebenarnya berasal dari perubahan bersamaan.",
+                  "options": [
+                    { "text": "Saat dua branch mengubah baris yang sama dengan isi berbeda", "correct": true },
+                    { "text": "Setiap kali melakukan git commit", "correct": false },
+                    { "text": "Hanya saat repository berisi lebih dari 100 file", "correct": false },
+                    { "text": "Saat branch memiliki nama yang sama dengan file", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Pernyataan mana yang paling tepat tentang merge conflict?",
+                  "explanation": "Konflik adalah mekanisme Git meminta keputusan manusia; commit dan file tidak otomatis rusak. Setelah resolusi dan commit, merge selesai normal. Kesalahan umum: menghapus repository atau reset --hard karena panik, sehingga pekerjaan bisa hilang.",
+                  "options": [
+                    { "text": "Konflik adalah permintaan Git agar manusia memilih hasil gabungan", "correct": true },
+                    { "text": "Konflik berarti repository harus di-clone ulang", "correct": false },
+                    { "text": "Konflik hanya bisa diselesaikan dengan force push", "correct": false },
+                    { "text": "Konflik menandakan commit sebelumnya tidak valid", "correct": false }
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "membaca-dan-resolusi-conflict",
+              "title": "Membaca & Menyelesaikan Conflict",
+              "estimated_minutes": 9,
+              "order_no": 2,
+              "content_md": "## Hook\n\nSari melihat tiga baris aneh di file: `<<<<<<<`, `=======`, dan `>>>>>>>`. Ia menghapus dua versi kode lalu menyimpan marker `=======` karena mengira itu bagian dari sintaks. Commit berhasil, tetapi aplikasi error saat dijalankan. Marker konflik bukan kode; semuanya harus hilang sebelum commit.\n\n## Konsep\n\nMenyelesaikan konflik adalah proses membaca, memutuskan, menguji, lalu menandai selesai.\n\n1. **Baca konteks.** Jalankan `git status` untuk melihat file `both modified`. Buka file dan pahami versi ours (antara `<<<<<<<` dan `=======`) serta theirs (antara `=======` dan `>>>>>>>`).\n2. **Putuskan hasil akhir.** Kamu bisa mempertahankan ours, mengambil theirs, atau menggabungkan keduanya. Yang benar bergantung pada tujuan kode, bukan pada siapa yang menulis.\n3. **Hapus semua marker.** File akhir tidak boleh mengandung `<<<<<<<`, `=======`, atau `>>>>>>>`.\n4. **Uji.** Jalankan test atau build. Konflik yang terselesaikan secara sintaks belum tentu benar secara logika.\n5. **Stage dan commit.** `git add` menandai konflik selesai, lalu `git commit` menutup merge.\n\nContoh hasil resolusi yang menggabungkan dua perubahan:\n\n```js\nconst email = input.email.trim().toLowerCase();\nconst phone = normalizePhone(input.phone);\n```\n\nJika kamu bingung atau ingin membatalkan merge, jalankan `git merge --abort`. Ini mengembalikan kondisi sebelum merge dimulai. Untuk melihat versi masing-masing branch, `git diff --ours` dan `git diff --theirs` membantu, dan `git mergetool` membuka alat visual tiga panel.\n\nBedakan dua jenis masalah. Konflik konten terjadi saat merge dan ditandai marker. Penolakan push `non-fast-forward` bukan konflik file; artinya remote punya commit yang belum kamu miliki. Solusinya `git pull` (atau `git pull --rebase` sesuai kebijakan tim), selesaikan konflik bila ada, lalu push lagi.\n\nSetelah semua file di-stage dan diuji, commit penutup merge sebaiknya menjelaskan keputusan, misalnya `resolve: pertahankan validasi email baru dan telepon`. Jangan langsung force push ke branch bersama hanya untuk menghindari merge.\n\n## Praktik\n\nSandbox berisi konflik pada `src/app.js`. Buka file, satukan kedua aturan validasi, hapus marker, stage, lalu commit.\n\n```bash\ngit status\ngit add src/app.js\ngit commit -m 'resolve: satukan validasi email dan telepon'\n```\n\nJika hasil test gagal, perbaiki file sebelum `git add`. Setelah commit, `git status` harus bersih. Di GitHub, konflik pada PR juga bisa diselesaikan lewat tombol **Resolve conflicts**, tetapi untuk konflik rumit lebih aman menarik branch secara lokal dan mengujinya.\n\n## Ringkasan\n\n- Pahami ours dan theirs sebelum memilih hasil akhir.\n- Hapus semua marker, uji kode, baru stage dan commit.\n- `git merge --abort` membatalkan merge; push rejection bukan konflik file.\n\n**Cheat sheet:** `git status` → edit file → `git add <file>` → `git commit`; batal dengan `git merge --abort`.",
+              "practice_config": {
+                "scenario": "conflict",
+                "goal": "Selesaikan konflik src/app.js secara manual, pastikan tidak ada marker tersisa, lalu commit dengan pesan yang jelas.",
+                "commands": ["git status", "git add src/app.js", "git commit -m 'resolve: satukan validasi email dan telepon'"],
+                "checks": [
+                  { "type": "conflict_resolved", "value": "src/app.js", "label": "Tidak ada marker konflik di src/app.js" },
+                  { "type": "clean_worktree", "label": "Working tree bersih" },
+                  { "type": "command_used", "value": "git add", "label": "File hasil resolusi di-stage" },
+                  { "type": "commit_message_contains", "value": "resolve", "label": "Pesan commit menjelaskan resolusi" }
+                ],
+                "hints": [
+                  "Gunakan git status untuk memastikan file mana yang masih berkonflik.",
+                  "Baca kedua versi, tulis hasil akhir, dan pastikan tiga jenis marker benar-benar hilang.",
+                  "Setelah yakin, stage file dengan git add src/app.js lalu tutup merge dengan commit."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Apa yang harus dilakukan dengan baris <<<<<<<, =======, dan >>>>>>> setelah memilih isi konflik?",
+                  "explanation": "Semua baris marker harus dihapus karena bukan bagian dari kode dan akan menyebabkan error sintaks. Menyisakan salah satunya adalah kesalahan umum, terutama ======= yang terlihat seperti pemisah komentar. Setelah dihapus, file diuji lalu di-stage.",
+                  "options": [
+                    { "text": "Hapus semuanya sebelum file diuji dan di-stage", "correct": true },
+                    { "text": "Pertahankan ======= sebagai penanda blok", "correct": false },
+                    { "text": "Ubah menjadi komentar agar aman", "correct": false },
+                    { "text": "Biarkan karena Git menghapusnya saat commit", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Perintah apa yang membatalkan merge yang sedang berkonflik dan mengembalikan kondisi sebelum merge?",
+                  "explanation": "git merge --abort menghentikan proses merge dan mengembalikan working tree ke kondisi sebelumnya. git reset --hard juga mengubah state tetapi lebih berisiko menghapus perubahan yang belum disimpan. Pitfall: memakai --abort setelah merge sudah di-commit; pada tahap itu gunakan revert.",
+                  "options": [
+                    { "text": "git merge --abort", "correct": true },
+                    { "text": "git merge --continue", "correct": false },
+                    { "text": "git checkout --ours", "correct": false },
+                    { "text": "git commit --amend", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Push ditolak dengan pesan non-fast-forward. Apa arti pesan tersebut?",
+                  "explanation": "Remote memiliki commit yang belum ada di lokal sehingga push tidak bisa diterapkan sebagai fast-forward. Solusinya menarik perubahan lebih dulu, menyelesaikan konflik bila muncul, lalu push. Ini berbeda dari konflik marker pada merge lokal. Force push tanpa koordinasi dapat menghapus pekerjaan rekan.",
+                  "options": [
+                    { "text": "Remote punya commit yang belum ada di lokal; tarik dulu perubahan tersebut", "correct": true },
+                    { "text": "File lokal mengandung marker konflik", "correct": false },
+                    { "text": "Repository remote sudah dihapus", "correct": false },
+                    { "text": "Branch lokal belum pernah di-commit", "correct": false }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Issue & Project",
+          "description": "Mengubah laporan dan rencana kerja tim menjadi issue yang jelas, lalu memantau alurnya di GitHub Projects.",
+          "order_no": 9,
+          "lessons": [
+            {
+              "slug": "issue-label-milestone",
+              "title": "Issue, Label, dan Milestone",
+              "estimated_minutes": 8,
+              "order_no": 1,
+              "content_md": "## Hook\n\nSeorang QA melaporkan bug lewat chat pribadi: 'Login kadang muter terus'. Pesan itu tenggelam di antara ratusan obrolan. Dua minggu kemudian bug yang sama dilaporkan lagi oleh pengguna lain. Tim tidak punya satu tempat pun untuk melacak masalah, prioritas, dan siapa yang mengerjakannya.\n\n## Konsep\n\n**Issue** adalah unit kerja di GitHub: bug, permintaan fitur, tugas teknis, atau pertanyaan. Issue yang baik punya judul spesifik dan body yang bisa dieksekusi. Untuk bug, sertakan langkah reproduksi, hasil yang diharapkan, hasil aktual, versi/browser, dan screenshot. Gunakan issue template di `.github/ISSUE_TEMPLATE/` agar informasi tidak hilang.\n\n**Label** mengelompokkan issue. Kebanyakan tim memakai taksonomi sederhana:\n\n- `bug`, `enhancement`, `documentation` untuk jenis pekerjaan.\n- `area: frontend`, `area: backend` untuk lokasi kode.\n- `priority: high` untuk urgensi.\n- `good first issue`, `help wanted` untuk membuka kontribusi.\n\nJangan membuat puluhan label yang tumpang tindih; label yang tidak pernah dipakai justru menambah kebisingan.\n\n**Milestone** mengelompokkan issue menuju target tertentu, misalnya `v1.2 - Checkout` dengan tanggal rilis. Milestone menjawab 'kapan ini harus selesai', sedangkan label menjawab 'ini pekerjaan seperti apa'.\n\nIssue terhubung ke pekerjaan lewat assignee dan referensi di commit atau PR. Menulis `Closes #42` di deskripsi PR akan menutup issue nomor 42 secara otomatis saat PR di-merge ke branch default. Kata kunci lain yang dikenali: `Fixes`, `Resolves`. PR dan issue punya peran berbeda: issue mendeskripsikan masalah, PR berisi solusinya.\n\nAlur triage yang sehat: issue baru diberi label dan assignee dalam satu hari kerja, issue duplikat ditutup dengan tautan ke issue utama, dan issue yang tidak jelas ditanya balik sebelum dikerjakan.\n\n## Praktik\n\nSandbox mensimulasikan pengerjaan issue #42 tentang redirect login. Buat branch yang menyebut nomor issue, commit dengan pesan yang menutup issue, lalu push.\n\n```bash\ngit switch -c fix/42-login-redirect\ngit commit -m 'fix: redirect ke dashboard setelah login (closes #42)'\ngit push -u origin fix/42-login-redirect\n```\n\nDi GitHub, buka PR dari branch tersebut dan pastikan deskripsi memuat `Closes #42`. Setelah PR di-merge ke branch default, issue akan tertutup otomatis dan tautan commit tetap terlihat di timeline issue.\n\n## Ringkasan\n\n- Issue adalah tempat resmi melaporkan dan melacak pekerjaan.\n- Label mengklasifikasi, milestone menargetkan waktu/rilis, assignee menentukan pemilik.\n- `Closes #42` menghubungkan PR dengan issue yang diselesaikan.\n\n**Cheat sheet:** `gh issue create --title '...' --label bug` membuat issue; `gh issue list --label 'good first issue'` mencarinya dari terminal.",
+              "practice_config": {
+                "scenario": "remote",
+                "goal": "Buat branch untuk issue #42, commit perbaikan dengan referensi issue, lalu push branch ke remote.",
+                "commands": ["git switch -c fix/42-login-redirect", "git commit -m 'fix: redirect ke dashboard setelah login (closes #42)'", "git push -u origin fix/42-login-redirect"],
+                "checks": [
+                  { "type": "branch_exists", "value": "fix/42-login-redirect", "label": "Branch menyebut nomor issue" },
+                  { "type": "commit_message_contains", "value": "#42", "label": "Pesan commit mereferensikan issue #42" },
+                  { "type": "remote_branch_exists", "value": "fix/42-login-redirect", "remote": "origin", "label": "Branch terkirim ke remote" },
+                  { "type": "command_used", "value": "git push", "label": "Push dijalankan untuk mengirim branch" }
+                ],
+                "hints": [
+                  "Buat branch dari main dengan nama yang menyebut nomor issue.",
+                  "Sertakan closes #42 di pesan commit atau deskripsi PR.",
+                  "Gunakan git push -u origin fix/42-login-redirect agar branch terlacak."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Apa fungsi milestone pada issue GitHub?",
+                  "explanation": "Milestone mengelompokkan issue menuju target rilis atau tenggat tertentu, misalnya v1.2. Label menjelaskan jenis pekerjaan, bukan waktu. Kesalahan umum: memakai milestone sebagai pengganti label prioritas.",
+                  "options": [
+                    { "text": "Mengelompokkan issue menuju target rilis atau tenggat tertentu", "correct": true },
+                    { "text": "Menentukan warna tampilan issue", "correct": false },
+                    { "text": "Menggantikan branch protection", "correct": false },
+                    { "text": "Menutup issue secara otomatis saat dibuat", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Di mana kata kunci Closes #42 paling tepat diletakkan agar issue tertutup saat PR di-merge?",
+                  "explanation": "Kata kunci penutup bekerja di deskripsi PR (atau pesan commit yang masuk ke branch default). GitHub menutup issue saat PR di-merge ke branch default. Menaruhnya di komentar biasa atau judul branch tidak memicu penutupan otomatis.",
+                  "options": [
+                    { "text": "Di deskripsi PR yang di-merge ke branch default", "correct": true },
+                    { "text": "Di nama branch saja", "correct": false },
+                    { "text": "Di komentar review tanpa approve", "correct": false },
+                    { "text": "Di file README repository", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Label good first issue sebaiknya digunakan untuk…",
+                  "explanation": "Label ini menandai tugas kecil dan terdefinisi baik sehingga kontributor baru bisa mulai tanpa banyak konteks. Label tersebut bukan jaminan issue mudah untuk semua orang, dan maintainer tetap perlu menjelaskan ruang lingkup. Pitfall: memberi label ini pada refactor besar.",
+                  "options": [
+                    { "text": "Tugas kecil yang ramah untuk kontributor pertama", "correct": true },
+                    { "text": "Bug kritis yang harus segera diperbaiki", "correct": false },
+                    { "text": "Issue yang sudah selesai dikerjakan", "correct": false },
+                    { "text": "Semua issue secara default", "correct": false }
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "github-projects",
+              "title": "Mengelola Pekerjaan dengan GitHub Projects",
+              "estimated_minutes": 8,
+              "order_no": 2,
+              "content_md": "## Hook\n\nSetiap Senin tim membuka spreadsheet berisi status tugas. Separuh baris sudah tidak akurat karena orang lupa memperbarui, dan PR yang sudah merge masih berstatus 'In progress'. Standup habis 20 menit hanya untuk menyamakan status. GitHub Projects memindahkan papan kerja itu ke dekat issue dan PR, sehingga status bisa diperbarui otomatis.\n\n## Konsep\n\n**GitHub Projects** adalah lapisan perencanaan di atas issue dan PR. Issue tetap menyimpan diskusi dan detail teknis; project menyimpan bagaimana pekerjaan itu bergerak dari ide sampai selesai.\n\nSatu project dapat mengumpulkan item dari beberapa repository. Tampilan yang umum:\n\n- **Table** — daftar item dengan kolom field, cocok untuk triage dan prioritas.\n- **Board** — kartu per kolom Status, misalnya Todo, In progress, Done.\n- **Roadmap** — item pada garis waktu berdasarkan tanggal mulai/target.\n\nField penting: `Status`, `Priority`, `Iteration`, `Estimate`, dan `Target date`. Field bisa berupa single select, number, date, atau text. Kamu juga bisa membuat view terfilter, misalnya `label:bug -status:Done` untuk melihat bug yang belum selesai, atau mengelompokkan berdasarkan assignee.\n\nWorkflow bawaan dapat mengotomatiskan status. Contohnya, item dipindah ke Done ketika issue ditutup atau PR di-merge, dan dipindah ke In progress ketika PR dibuka. Otomasi mengurangi pekerjaan administratif, tetapi tidak menggantikan diskusi tim.\n\nPraktik yang sehat: satu item mewakili satu unit kerja, gunakan template issue, review board saat planning, dan arsipkan item lama. Jangan memakai project sebagai pengganti issue; kartu tanpa issue kehilangan konteks dan riwayat diskusi.\n\nProject bisa dibuat di level personal atau organisasi. Untuk tim, project organisasi lebih mudah dibagikan dan diatur permission-nya. Akses project terpisah dari akses repository, jadi pastikan anggota tim mendapat role yang sesuai.\n\n## Praktik\n\nSandbox berisi repo tim. Simulasikan pengambilan item project dengan membuat branch untuk filter board, lalu commit perubahan kecil.\n\n```bash\ngit switch -c feat/board-filter\ngit add src/board.js\ngit commit -m 'feat: tambah filter status board'\n```\n\nDi GitHub, setelah PR dibuka dan dihubungkan ke item project, workflow dapat memindahkan kartu ke In progress. Saat PR di-merge, kartu berpindah ke Done dan issue terkait tertutup. Perhatikan bahwa status project bukan pengganti review kode atau status check CI.\n\n## Ringkasan\n\n- Project adalah lapisan perencanaan; issue adalah sumber konteks pekerjaan.\n- View Table, Board, dan Roadmap menampilkan data yang sama dengan cara berbeda.\n- Workflow bawaan menjaga status tetap dekat dengan kenyataan.\n\n**Cheat sheet:** `gh project list --owner tim` melihat project; `gh project item-add <nomor> --url <issue-url>` menambahkan issue ke project.",
+              "practice_config": {
+                "scenario": "branches",
+                "goal": "Buat branch untuk item project baru, commit perubahan filter board, dan pastikan HEAD berada di branch tersebut.",
+                "commands": ["git switch -c feat/board-filter", "git add src/board.js", "git commit -m 'feat: tambah filter status board'"],
+                "checks": [
+                  { "type": "branch_exists", "value": "feat/board-filter", "label": "Branch feat/board-filter dibuat" },
+                  { "type": "head_branch", "value": "feat/board-filter", "label": "HEAD berada di branch fitur" },
+                  { "type": "commit_message_contains", "value": "filter status", "label": "Commit menjelaskan perubahan filter" },
+                  { "type": "command_used", "value": "git switch -c", "label": "Branch dibuat lewat git switch -c" }
+                ],
+                "hints": [
+                  "Buat branch baru sebelum mengubah file, jangan bekerja langsung di main.",
+                  "Stage file yang relevan dengan item project.",
+                  "Gunakan pesan commit yang menjelaskan hasil, misalnya filter status board."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Apa hubungan yang tepat antara issue dan GitHub Projects?",
+                  "explanation": "Issue menyimpan detail dan diskusi pekerjaan, sedangkan project mengatur tampilan serta alurnya. Project dapat menampilkan issue dari beberapa repository. Kesalahan umum: menganggap project menggantikan issue sehingga konteks pekerjaan hilang.",
+                  "options": [
+                    { "text": "Issue menyimpan konteks pekerjaan; project mengatur perencanaan dan statusnya", "correct": true },
+                    { "text": "Project menghapus kebutuhan issue", "correct": false },
+                    { "text": "Issue hanya bisa dibuat dari dalam project", "correct": false },
+                    { "text": "Project adalah nama lain dari branch protection", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa manfaat workflow bawaan pada GitHub Projects?",
+                  "explanation": "Workflow dapat memindahkan item ke status tertentu saat issue ditutup atau PR di-merge, sehingga papan lebih akurat. Otomasi tidak menjamin kode benar dan tidak menggantikan review. Pitfall: mengandalkan otomasi tanpa pernah merapikan item manual.",
+                  "options": [
+                    { "text": "Memperbarui status item otomatis berdasarkan kejadian di issue atau PR", "correct": true },
+                    { "text": "Menjalankan test otomatis sebelum merge", "correct": false },
+                    { "text": "Menggantikan code review", "correct": false },
+                    { "text": "Membuat branch otomatis untuk setiap issue", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Pada tampilan Board, kolom biasanya merepresentasikan…",
+                  "explanation": "Kolom board umumnya memetakan field Status seperti Todo, In progress, dan Done. Field lain seperti Priority bisa dipakai untuk filter atau grouping, tetapi bukan kolom default. Kesalahan umum: mengira board menyimpan data terpisah dari issue.",
+                  "options": [
+                    { "text": "Nilai field Status dari item project", "correct": true },
+                    { "text": "Daftar branch di repository", "correct": false },
+                    { "text": "Jumlah commit per penulis", "correct": false },
+                    { "text": "Daftar reviewer yang tersedia", "correct": false }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Open Source",
+          "description": "Masuk ke proyek open source dengan sopan: memahami alur kontribusi, aturan proyek, dan etika berkolaborasi.",
+          "order_no": 10,
+          "lessons": [
+            {
+              "slug": "kontribusi-open-source",
+              "title": "Kontribusi ke Open Source",
+              "estimated_minutes": 9,
+              "order_no": 1,
+              "content_md": "## Hook\n\nSari ingin berkontribusi ke library populer. Ia langsung mengubah 12 file dan membuka PR tanpa membaca panduan atau berdiskusi. Maintainer menutup PR dengan komentar singkat: 'Please read CONTRIBUTING and open an issue first.' Usahanya besar, tetapi tidak sesuai proses proyek, sehingga tidak bisa di-review.\n\n## Konsep\n\nOpen source bukan sekadar kode gratis; ia adalah komunitas dengan aturan. Sebelum menulis kode, lakukan riset kecil:\n\n1. Baca `README.md` untuk cara build dan test.\n2. Baca `CONTRIBUTING.md` dan `CODE_OF_CONDUCT.md`.\n3. Cari issue berlabel `good first issue` atau `help wanted`.\n4. Komentar di issue bahwa kamu ingin mengerjakannya, lalu tunggu konfirmasi maintainer.\n\nAlur teknisnya mirip fork dan PR: fork repository, clone fork, tambahkan `upstream`, buat branch dari branch default terbaru, kerjakan perubahan kecil, jalankan test/lint, commit mengikuti konvensi proyek, push ke fork, lalu buka PR ke repository asli.\n\nSinkronisasi fork yang tertinggal:\n\n```bash\ngit fetch upstream\ngit switch main\ngit merge upstream/main\ngit push origin main\n```\n\nPR yang baik kecil dan fokus. Jelaskan masalah, pendekatan, dan cara menguji. Jika proyek memakai Conventional Commits, ikuti. Jika ada DCO, pastikan setiap commit ditandatangani; jika ada CLA, baca konsekuensinya sebelum menyetujui.\n\nSetelah PR dibuka, tanggapi review dengan sopan. Maintainer adalah sukarelawan dengan waktu terbatas; tidak ada kewajiban merespons dalam hitungan jam. Jangan menandai semua orang, mengirim pesan pribadi berulang, atau meminta merge segera. Jika PR ditolak, tanyakan alasan dan pelajari; tidak semua ide cocok dengan arah proyek.\n\nKontribusi juga bisa berupa dokumentasi, test, terjemahan, atau triage issue. Kontribusi non-kode sering jauh lebih dibutuhkan daripada fitur besar yang tidak diminta.\n\n## Praktik\n\nSandbox mensimulasikan fork yang siap dikerjakan. Clone repo, buat branch perbaikan dokumentasi, commit, lalu push ke fork.\n\n```bash\ngit clone git@github.com:sari/docs-app.git\ngit switch -c fix/typo-readme\ngit commit -m 'docs: perbaiki typo pada panduan instalasi'\ngit push -u origin fix/typo-readme\n```\n\nDi GitHub, buka PR dari branch tersebut ke `main` repository asli. Isi deskripsi dengan tautan issue terkait dan langkah verifikasi. Pastikan hanya file relevan yang berubah.\n\n## Ringkasan\n\n- Baca README, CONTRIBUTING, dan Code of Conduct sebelum berkontribusi.\n- Mulai dari issue kecil, komunikasikan niat, dan buat PR yang fokus.\n- Hormati waktu maintainer; review adalah diskusi, bukan perlombaan.\n\n**Cheat sheet:** `gh repo fork owner/repo --clone` → `git remote add upstream <url>` → branch → commit → `git push -u origin <branch>` → `gh pr create`.",
+              "practice_config": {
+                "scenario": "remote",
+                "goal": "Clone fork, buat branch perbaikan dokumentasi, commit perubahan, lalu push branch ke remote.",
+                "commands": ["git clone git@github.com:sari/docs-app.git", "git switch -c fix/typo-readme", "git commit -m 'docs: perbaiki typo pada panduan instalasi'", "git push -u origin fix/typo-readme"],
+                "checks": [
+                  { "type": "command_used", "value": "git clone", "label": "Fork berhasil di-clone" },
+                  { "type": "branch_exists", "value": "fix/typo-readme", "label": "Branch perbaikan dibuat" },
+                  { "type": "commit_message_contains", "value": "typo", "label": "Commit menjelaskan perbaikan dokumentasi" },
+                  { "type": "remote_branch_exists", "value": "fix/typo-readme", "remote": "origin", "label": "Branch terkirim ke fork" }
+                ],
+                "hints": [
+                  "Clone fork terlebih dahulu, jangan bekerja di repository asli.",
+                  "Buat branch baru khusus untuk perbaikan dokumentasi.",
+                  "Commit dengan pesan docs: ... lalu push memakai -u ke origin."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Langkah pertama yang sebaiknya dilakukan sebelum mengirim PR ke proyek open source adalah…",
+                  "explanation": "Membaca CONTRIBUTING dan berdiskusi di issue membantu memastikan perubahan sesuai arah proyek. Langsung menulis kode besar berisiko ditolak karena proses atau desain tidak cocok. Pitfall: menganggap semua proyek menerima fitur tanpa persetujuan.",
+                  "options": [
+                    { "text": "Membaca panduan kontribusi dan mendiskusikan rencana di issue", "correct": true },
+                    { "text": "Langsung mengubah sebanyak mungkin file", "correct": false },
+                    { "text": "Meminta akses admin ke repository", "correct": false },
+                    { "text": "Menjalankan force push ke branch main", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Untuk apa remote upstream dipakai saat berkontribusi dari fork?",
+                  "explanation": "Upstream menunjuk ke repository asli agar kamu dapat mengambil perubahan maintainer dan mengurangi konflik. Origin tetap fork milikmu. Kesalahan umum: melakukan push ke upstream padahal tidak punya akses tulis.",
+                  "options": [
+                    { "text": "Mengambil pembaruan dari repository asli agar branch tetap mutakhir", "correct": true },
+                    { "text": "Menyimpan kredensial SSH", "correct": false },
+                    { "text": "Membuka pull request otomatis", "correct": false },
+                    { "text": "Menghapus history fork", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Mengapa PR open source sebaiknya kecil dan fokus?",
+                  "explanation": "PR kecil lebih mudah di-review, diuji, dan di-revert bila bermasalah. Perubahan besar mencampur banyak tujuan sehingga risiko bug dan konflik meningkat. Pitfall: menggabungkan refactor besar dengan perbaikan bug dalam satu PR.",
+                  "options": [
+                    { "text": "Lebih mudah di-review, diuji, dan dikembalikan bila bermasalah", "correct": true },
+                    { "text": "Agar otomatis mendapat label good first issue", "correct": false },
+                    { "text": "Karena GitHub menolak PR lebih dari 10 file", "correct": false },
+                    { "text": "Supaya tidak perlu menulis deskripsi", "correct": false }
+                  ]
+                }
+              ]
+            },
+            {
+              "slug": "contributing-dan-etika",
+              "title": "CONTRIBUTING.md & Etika Kolaborasi",
+              "estimated_minutes": 8,
+              "order_no": 2,
+              "content_md": "## Hook\n\nPR Dimas berisi kode yang berfungsi, tetapi ditolak karena tidak ada test, nama branch tidak mengikuti aturan, dan deskripsi kosong. Ia membalas dengan nada kesal: 'Kodenya jalan, kenapa ditolak?' Diskusi memanas, padahal masalahnya bukan kualitas kode semata, melainkan ekspektasi kolaborasi yang tidak pernah ia baca.\n\n## Konsep\n\n`CONTRIBUTING.md` adalah kontrak kerja proyek. Isinya biasanya:\n\n- cara menyiapkan environment dan menjalankan test/lint;\n- aturan nama branch dan format commit;\n- langkah membuat issue dan PR;\n- checklist PR, misalnya test lulus dan dokumentasi diperbarui;\n- kebijakan review dan rilis.\n\nMenulis panduan ini bukan formalitas. Setiap aturan menghemat satu putaran review. Jika proyek belum punya, kontribusi pertama yang berguna justru menambahkan `CONTRIBUTING.md` yang jelas, bukan menambah fitur.\n\n`CODE_OF_CONDUCT.md` mengatur perilaku komunitas dan biasanya menyebut konsekuensi pelanggaran. Dokumen ini melindungi kontributor dari pelecehan dan menjaga diskusi tetap profesional. Etika kolaborasi yang sehat antara lain:\n\n- kritik kode, bukan orangnya;\n- asumsikan niat baik, tetapi tunjukkan bukti dari kode atau test;\n- jangan menandai seluruh tim atau mengirim DM berulang untuk meminta review;\n- satu PR untuk satu tujuan, dan jelaskan perubahan yang sulit dilihat;\n- setelah menerima review, balas atau terapkan perubahan, lalu minta review ulang;\n- jangan force push ke branch bersama tanpa memberi tahu rekan;\n- hargai keputusan maintainer dan dokumentasikan keputusan penting di issue.\n\nJika kamu menerima kritik, fokus pada pertanyaan teknis: apa yang salah, dalam kondisi apa, dan bagaimana membuktikannya. Jika kamu memberi review, jelaskan alasannya dan tawarkan arah perbaikan. Komentar seperti 'ini jelek' tidak membantu siapa pun.\n\nUntuk perubahan besar, buka issue diskusi lebih dulu. Ini mencegah kamu menghabiskan waktu pada desain yang tidak akan diterima. Untuk perubahan kecil seperti typo, PR langsung biasanya diterima.\n\n## Praktik\n\nSandbox berisi repo tim yang belum punya panduan kontribusi. Buat branch dokumentasi, tambahkan `CONTRIBUTING.md`, lalu commit.\n\n```bash\ngit switch -c docs/contributing\ngit add CONTRIBUTING.md\ngit commit -m 'docs: tambah panduan kontribusi dan alur review'\n```\n\nIsi file minimal memuat cara menjalankan test, aturan branch, format commit, dan checklist PR. Setelah commit, buka PR dan minta review satu orang. Pastikan working tree bersih dan tidak ada file lain yang ikut terbawa.\n\n## Ringkasan\n\n- CONTRIBUTING.md menjelaskan cara berkontribusi; Code of Conduct mengatur perilaku.\n- Review yang baik berfokus pada kode, bukti, dan perbaikan yang bisa dilakukan.\n- PR kecil, deskripsi jelas, dan komunikasi sopan jauh lebih penting daripada kecepatan merge.\n\n**Cheat sheet:** tambahkan `CONTRIBUTING.md` lewat branch `docs/...`; cantumkan perintah test, aturan branch, format commit, dan checklist PR.",
+              "practice_config": {
+                "scenario": "initialized",
+                "goal": "Buat branch dokumentasi, tambahkan CONTRIBUTING.md, lalu commit dengan pesan yang sesuai.",
+                "commands": ["git switch -c docs/contributing", "git add CONTRIBUTING.md", "git commit -m 'docs: tambah panduan kontribusi dan alur review'"],
+                "checks": [
+                  { "type": "branch_exists", "value": "docs/contributing", "label": "Branch docs/contributing dibuat" },
+                  { "type": "file_committed", "value": "CONTRIBUTING.md", "label": "CONTRIBUTING.md masuk ke commit" },
+                  { "type": "commit_message_contains", "value": "panduan kontribusi", "label": "Pesan commit menjelaskan isi dokumen" },
+                  { "type": "clean_worktree", "label": "Working tree bersih setelah commit" }
+                ],
+                "hints": [
+                  "Buat branch dokumentasi terlebih dahulu agar main tetap bersih.",
+                  "Buat file CONTRIBUTING.md di root repository, bukan di dalam src.",
+                  "Stage hanya file itu, lalu commit dengan awalan docs:."
+                ]
+              },
+              "quizzes": [
+                {
+                  "question": "Isi mana yang paling tepat dimasukkan ke CONTRIBUTING.md?",
+                  "explanation": "CONTRIBUTING.md menjelaskan cara berkontribusi: setup, test, aturan branch/commit, dan checklist PR. Password atau token tidak boleh ada di dokumen repo. Pitfall: menulis hanya kata 'kirim PR' tanpa langkah yang bisa diikuti.",
+                  "options": [
+                    { "text": "Cara menjalankan test, aturan branch dan commit, serta checklist PR", "correct": true },
+                    { "text": "Token akses dan password maintainer", "correct": false },
+                    { "text": "Daftar gaji kontributor", "correct": false },
+                    { "text": "Semua isi kode sumber yang sudah ada", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Apa fungsi CODE_OF_CONDUCT.md dalam sebuah proyek?",
+                  "explanation": "Dokumen ini menetapkan standar perilaku dan konsekuensi pelanggaran agar komunitas aman dan profesional. Ia tidak mengatur gaya kode atau proses rilis. Kesalahan umum: menganggapnya formalitas yang tidak pernah ditegakkan.",
+                  "options": [
+                    { "text": "Menetapkan standar perilaku komunitas dan konsekuensi pelanggaran", "correct": true },
+                    { "text": "Menentukan strategi merge yang wajib dipakai", "correct": false },
+                    { "text": "Mengatur versi Node yang didukung", "correct": false },
+                    { "text": "Menyimpan daftar dependency proyek", "correct": false }
+                  ]
+                },
+                {
+                  "question": "Reviewer meminta perubahan pada PR-mu. Respons yang paling profesional adalah…",
+                  "explanation": "Respons terbaik adalah memahami alasan, memperbaiki di branch yang sama, menjalankan test, lalu meminta review ulang. Berdebat tanpa bukti atau membuat PR baru yang terpisah justru mempersulit. Pitfall: menghapus komentar review tanpa menyelesaikan masalah.",
+                  "options": [
+                    { "text": "Terapkan perbaikan, jelaskan perubahan, lalu minta review ulang", "correct": true },
+                    { "text": "Abaikan komentar dan minta maintainer langsung merge", "correct": false },
+                    { "text": "Tutup PR lalu buka PR baru tanpa perubahan", "correct": false },
+                    { "text": "Force push ke branch main repository asli", "correct": false }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "cheatsheet": [
+    {
+      "category": "GitHub Setup",
+      "command": "gh repo create",
+      "description": "Membuat repository GitHub langsung dari terminal dan menghubungkannya ke folder lokal.",
+      "example": "gh repo create tim/frontend-app --private --clone"
+    },
+    {
+      "category": "Autentikasi",
+      "command": "ssh-keygen -t ed25519 -C 'email'",
+      "description": "Membuat pasangan SSH key; unggah file .pub ke GitHub, simpan private key di laptop.",
+      "example": "ssh-keygen -t ed25519 -C 'dimas@example.com'"
+    },
+    {
+      "category": "Autentikasi",
+      "command": "ssh -T git@github.com",
+      "description": "Menguji apakah SSH key sudah dikenali GitHub.",
+      "example": "ssh -T git@github.com"
+    },
+    {
+      "category": "Autentikasi",
+      "command": "git config --global credential.helper manager",
+      "description": "Menyimpan PAT HTTPS lewat credential manager agar tidak diketik berulang.",
+      "example": "git config --global credential.helper manager"
+    },
+    {
+      "category": "Fork",
+      "command": "git remote add upstream <url>",
+      "description": "Menambahkan repository asli sebagai remote saat bekerja dari fork.",
+      "example": "git remote add upstream https://github.com/owner/repo.git"
+    },
+    {
+      "category": "Fork",
+      "command": "git fetch upstream",
+      "description": "Mengambil pembaruan repository asli tanpa langsung mengubah branch lokal.",
+      "example": "git fetch upstream"
+    },
+    {
+      "category": "Pull Request",
+      "command": "gh pr create --fill",
+      "description": "Membuat pull request dari branch saat ini dengan judul dan deskripsi dari commit.",
+      "example": "gh pr create --fill --base main"
+    },
+    {
+      "category": "Pull Request",
+      "command": "gh pr checkout <nomor>",
+      "description": "Mengambil branch PR orang lain ke lokal untuk diuji atau di-review.",
+      "example": "gh pr checkout 42"
+    },
+    {
+      "category": "Code Review",
+      "command": "gh pr review --approve",
+      "description": "Menyetujui PR dari terminal setelah memeriksa perubahan.",
+      "example": "gh pr review 42 --approve -b 'Sudah dites, aman'"
+    },
+    {
+      "category": "Code Review",
+      "command": "gh pr merge --squash --delete-branch",
+      "description": "Menggabungkan PR dengan satu commit squashed sekaligus menghapus branch fitur.",
+      "example": "gh pr merge 42 --squash --delete-branch"
+    },
+    {
+      "category": "Merge Conflict",
+      "command": "git diff --name-only --diff-filter=U",
+      "description": "Menampilkan daftar file yang masih berkonflik dan belum di-stage.",
+      "example": "git diff --name-only --diff-filter=U"
+    },
+    {
+      "category": "Merge Conflict",
+      "command": "<<<<<<< HEAD",
+      "description": "Marker awal versi branch saat ini (ours); pasangannya ======= dan >>>>>>> branch.",
+      "example": "<<<<<<< HEAD ... ======= ... >>>>>>> feature/header"
+    },
+    {
+      "category": "Merge Conflict",
+      "command": "git merge --abort",
+      "description": "Membatalkan merge yang sedang berkonflik dan kembali ke kondisi sebelum merge.",
+      "example": "git merge --abort"
+    },
+    {
+      "category": "Issue",
+      "command": "gh issue create --label bug",
+      "description": "Membuat issue baru langsung dari terminal dengan label awal.",
+      "example": "gh issue create --title 'Login berputar terus' --label bug"
+    },
+    {
+      "category": "Open Source",
+      "command": "CONTRIBUTING.md",
+      "description": "Panduan kontribusi proyek: setup, test, aturan branch/commit, dan checklist PR.",
+      "example": "Baca CONTRIBUTING.md sebelum membuka pull request"
+    }
+  ]
+}
