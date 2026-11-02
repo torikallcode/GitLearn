@@ -3,8 +3,8 @@
 GitLearn backend MVP.
 
 ## Setup
-1. Copy `.env.example` to `.env`.
-2. Ensure MySQL is running.
+1. Copy `.env.example` to `.env` (API, migrate, and seed load it automatically).
+2. Ensure MySQL is running and the database/user in `DB_DSN` exist.
 3. Run `make migrate-up`.
 4. Run `make seed`.
 5. Run `make run`.
@@ -25,5 +25,5 @@ GitLearn backend MVP.
 - `POST /api/v1/lessons/:slug/practice/complete`
 - `POST /api/v1/lessons/:slug/complete`
 - `GET /api/v1/progress`
-- `GET /api/v1/quizzes/reviews/today`
+- `GET /api/v1/reviews/today`
 - `GET /api/v1/health`

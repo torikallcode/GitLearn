@@ -310,6 +310,8 @@ export default function Lesson() {
               lines={simulator.lines}
               onCommand={simulator.run}
               onReset={simulator.reset}
+              onUndo={simulator.undo}
+              canUndo={simulator.canUndo}
               suggestions={practiceConfig?.commands || ['git status', 'git log --oneline', 'help']}
             />
             <CommitGraph repo={simulator.repo} />

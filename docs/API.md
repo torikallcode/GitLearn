@@ -75,6 +75,7 @@ Auth: `Authorization: Bearer <access_token>`.
 | POST | `/reviews/:id/answer` | `{option_id}` | same as quiz answer + `review_id` |
 | GET | `/stats` | – | `stats` |
 | GET | `/certificate` | – | `{available,name,completion_percent,completed_lessons,lessons_total,issued_at,certificate_code}` |
+| GET | `/certificates/:code` | – | Public certificate document for a shared `certificate_code` (no auth). |
 
 ## System
 

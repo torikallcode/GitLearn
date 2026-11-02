@@ -1,8 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { cx } from '../../../components/ui'
-import { RotateIcon, TerminalIcon } from '../../../components/icons'
+import { RotateIcon, TerminalIcon, UndoIcon } from '../../../components/icons'
 
-export default function Terminal({ lines = [], onCommand, onReset, suggestions = [], title = 'Terminal simulator' }) {
+export default function Terminal({
+  lines = [],
+  onCommand,
+  onReset,
+  onUndo,
+  canUndo = false,
+  suggestions = [],
+  title = 'Terminal simulator',
+}) {
   const [value, setValue] = useState('')
   const [history, setHistory] = useState([])
   const [historyIndex, setHistoryIndex] = useState(-1)
@@ -45,6 +53,9 @@ export default function Terminal({ lines = [], onCommand, onReset, suggestions =
     } else if (e.key === 'l' && e.ctrlKey) {
       e.preventDefault()
       onCommand?.('clear')
+    } else if (e.key.toLowerCase() === 'z' && e.ctrlKey) {
+      e.preventDefault()
+      onUndo?.()
     }
   }
 
@@ -55,14 +66,25 @@ export default function Terminal({ lines = [], onCommand, onReset, suggestions =
           <TerminalIcon className="h-3.5 w-3.5" />
           <span className="font-mono">{title}</span>
         </div>
-        <button
-          type="button"
-          onClick={onReset}
-          className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-medium text-ink-400 transition-colors hover:bg-white/10 hover:text-white"
-          aria-label="Reset sandbox"
-        >
-          <RotateIcon className="h-3 w-3" /> Reset
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={onUndo}
+            disabled={!canUndo}
+            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-medium text-ink-400 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Undo command terakhir"
+          >
+            <UndoIcon className="h-3 w-3" /> Undo
+          </button>
+          <button
+            type="button"
+            onClick={onReset}
+            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-medium text-ink-400 transition-colors hover:bg-white/10 hover:text-white"
+            aria-label="Reset sandbox"
+          >
+            <RotateIcon className="h-3 w-3" /> Reset
+          </button>
+        </div>
       </div>
 
       <div

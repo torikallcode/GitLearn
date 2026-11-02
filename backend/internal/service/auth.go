@@ -57,6 +57,9 @@ func (s *authService) Register(ctx context.Context, req dto.RegisterRequest) (*d
 	if level == "" {
 		level = domain.LevelBeginner
 	}
+	if level != domain.LevelBeginner && level != domain.LevelIntermediate && level != domain.LevelAdvanced {
+		return nil, domain.WrapValidation("level", "nilai tidak valid")
+	}
 
 	user := &domain.User{
 		Name:         name,

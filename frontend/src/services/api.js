@@ -117,4 +117,5 @@ export const api = {
     request(`/reviews/${id}/answer`, { method: 'POST', body: { option_id: optionId } }),
   stats: () => request('/stats'),
   certificate: () => request('/certificate'),
+  publicCertificate: (code) => request(`/certificates/${encodeURIComponent(code)}`, { auth: false }),
 }

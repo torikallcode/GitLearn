@@ -7,22 +7,26 @@ export default function useSimulator(scenario = 'empty') {
     { type: 'muted', text: `Sandbox siap (skenario: ${scenario}). Ketik "git status" atau "help".` },
   ])
   const [ranCommands, setRanCommands] = useState(0)
+  const [history, setHistory] = useState([])
 
   useEffect(() => {
     setRepo(createRepo(scenario))
     setLines([{ type: 'muted', text: `Sandbox siap (skenario: ${scenario}). Ketik "git status" atau "help".` }])
     setRanCommands(0)
+    setHistory([])
   }, [scenario])
 
   const reset = useCallback(() => {
     setRepo(createRepo(scenario))
     setLines([{ type: 'muted', text: 'Sandbox di-reset ke kondisi awal lesson.' }])
     setRanCommands(0)
+    setHistory([])
   }, [scenario])
 
   const run = useCallback((input) => {
     const command = input.trim()
     if (!command) return
+    setHistory((prev) => [...prev, { repo, lines, ranCommands }])
     const result = runCommand(repo, command)
     if (result.clear) {
       setLines([])
@@ -36,7 +40,17 @@ export default function useSimulator(scenario = 'empty') {
     setRepo(result.state)
     setRanCommands((n) => n + 1)
     return result
-  }, [repo])
+  }, [repo, lines, ranCommands])
 
-  return { repo, lines, run, reset, ranCommands, setLines }
+  const undo = useCallback(() => {
+    if (!history.length) return false
+    const previous = history[history.length - 1]
+    setRepo(previous.repo)
+    setLines(previous.lines)
+    setRanCommands(previous.ranCommands)
+    setHistory(history.slice(0, -1))
+    return true
+  }, [history])
+
+  return { repo, lines, run, reset, undo, canUndo: history.length > 0, ranCommands, setLines }
 }

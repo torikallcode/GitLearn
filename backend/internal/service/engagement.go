@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gitlearn/backend/internal/domain"
@@ -15,6 +17,7 @@ import (
 type EngagementService interface {
 	Stats(ctx context.Context, userID uint64) (*dto.StatsResponse, error)
 	Certificate(ctx context.Context, userID uint64) (*dto.Certificate, error)
+	PublicCertificate(ctx context.Context, code string) (*dto.Certificate, error)
 }
 
 type engagementService struct {
@@ -97,6 +100,45 @@ func (s *engagementService) Certificate(ctx context.Context, userID uint64) (*dt
 		cert.Code = fmt.Sprintf("GL-%d-%s", userID, now.Format("060102"))
 	}
 	return cert, nil
+}
+
+// PublicCertificate verifies a shared certificate code and returns the
+// certificate document without requiring a session.
+func (s *engagementService) PublicCertificate(ctx context.Context, code string) (*dto.Certificate, error) {
+	userID, issuedAt, err := parseCertificateCode(code)
+	if err != nil {
+		return nil, domain.ErrNotFound
+	}
+	now := s.now().UTC()
+	if issuedAt.After(now.Add(24 * time.Hour)) {
+		return nil, domain.ErrNotFound
+	}
+	cert, err := s.Certificate(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if !cert.Available {
+		return nil, domain.ErrNotFound
+	}
+	cert.IssuedAt = &issuedAt
+	cert.Code = fmt.Sprintf("GL-%d-%s", userID, issuedAt.Format("060102"))
+	return cert, nil
+}
+
+func parseCertificateCode(code string) (uint64, time.Time, error) {
+	parts := strings.Split(strings.TrimSpace(code), "-")
+	if len(parts) != 3 || parts[0] != "GL" {
+		return 0, time.Time{}, fmt.Errorf("invalid certificate code")
+	}
+	userID, err := strconv.ParseUint(parts[1], 10, 64)
+	if err != nil || userID == 0 {
+		return 0, time.Time{}, fmt.Errorf("invalid certificate code")
+	}
+	issuedAt, err := time.Parse("060102", parts[2])
+	if err != nil {
+		return 0, time.Time{}, fmt.Errorf("invalid certificate code")
+	}
+	return userID, issuedAt.UTC(), nil
 }
 
 func certificateLessons(lessons []domain.LessonContext) []domain.LessonContext {

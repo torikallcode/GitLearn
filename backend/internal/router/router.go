@@ -57,6 +57,7 @@ func New(d Deps) *gin.Engine {
 	public.GET("/lessons/:slug/quizzes", d.Content.ListQuizzes)
 	public.GET("/cheatsheet", d.Content.Cheatsheet)
 	public.GET("/search", d.Content.Search)
+	public.GET("/certificates/:code", d.Engagement.PublicCertificate)
 
 	protected := api.Group("")
 	protected.Use(middleware.Auth(d.Tokens))

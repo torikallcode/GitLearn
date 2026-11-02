@@ -41,3 +41,13 @@ func (h *EngagementHandler) Certificate(c *gin.Context) {
 	}
 	response.OK(c, cert)
 }
+
+// PublicCertificate is the shareable, read-only certificate view.
+func (h *EngagementHandler) PublicCertificate(c *gin.Context) {
+	cert, err := h.engagement.PublicCertificate(c.Request.Context(), c.Param("code"))
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+	response.OK(c, cert)
+}

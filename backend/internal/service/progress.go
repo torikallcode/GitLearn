@@ -59,6 +59,10 @@ func (s *progressService) CompletePractice(ctx context.Context, userID uint64, s
 	if err != nil {
 		return nil, err
 	}
+	pathLessons, err := s.content.ListLessonContextsByPath(ctx, lesson.PathID)
+	if err != nil {
+		return nil, err
+	}
 
 	p, err := s.getProgress(ctx, userID, lesson.ID)
 	if err != nil {
@@ -66,6 +70,11 @@ func (s *progressService) CompletePractice(ctx context.Context, userID uint64, s
 	}
 	if p == nil {
 		p = &domain.Progress{UserID: userID, LessonID: lesson.ID, Status: domain.StatusNotStarted}
+	}
+	if locked, err := s.lessonLocked(ctx, userID, lesson, pathLessons, p); err != nil {
+		return nil, err
+	} else if locked {
+		return nil, domain.ErrLessonLocked
 	}
 
 	if !p.PracticeDone {
@@ -104,20 +113,10 @@ func (s *progressService) CompleteLesson(ctx context.Context, userID uint64, slu
 	}
 	alreadyCompleted := p.Status == domain.StatusCompleted
 
-	if !alreadyCompleted {
-		for i, l := range pathLessons {
-			if l.ID != lesson.ID || i == 0 {
-				continue
-			}
-			prev, err := s.getProgress(ctx, userID, pathLessons[i-1].ID)
-			if err != nil {
-				return nil, err
-			}
-			if progressStatus(prev) != domain.StatusCompleted {
-				return nil, domain.ErrLessonLocked
-			}
-			break
-		}
+	if locked, err := s.lessonLocked(ctx, userID, lesson, pathLessons, p); err != nil {
+		return nil, err
+	} else if locked {
+		return nil, domain.ErrLessonLocked
 	}
 	if lesson.HasPractice() && !p.PracticeDone {
 		return nil, domain.ErrPracticeRequired
@@ -375,6 +374,32 @@ func (s *progressService) evaluateBadges(
 		newlyEarned = append(newlyEarned, mapBadge(def))
 	}
 	return newlyEarned, nil
+}
+
+func (s *progressService) lessonLocked(
+	ctx context.Context,
+	userID uint64,
+	lesson *domain.LessonContext,
+	pathLessons []domain.LessonContext,
+	current *domain.Progress,
+) (bool, error) {
+	if current != nil && current.Status == domain.StatusCompleted {
+		return false, nil
+	}
+	for i, candidate := range pathLessons {
+		if candidate.ID != lesson.ID {
+			continue
+		}
+		if i == 0 {
+			return false, nil
+		}
+		prev, err := s.getProgress(ctx, userID, pathLessons[i-1].ID)
+		if err != nil {
+			return false, err
+		}
+		return progressStatus(prev) != domain.StatusCompleted, nil
+	}
+	return false, nil
 }
 
 func (s *progressService) getProgress(ctx context.Context, userID, lessonID uint64) (*domain.Progress, error) {

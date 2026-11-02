@@ -159,6 +159,35 @@ func TestCompleteLessonEnforcesSequentialUnlock(t *testing.T) {
 	}
 }
 
+func TestCompletePracticeRejectsLockedLesson(t *testing.T) {
+	content := newFakeContent(
+		lessonFixture(1, 1, "git-fundamental", "core", 1, true),
+		lessonFixture(2, 1, "git-fundamental", "core", 2, true),
+	)
+	stats := newFakeStats()
+	svc := testProgress(t, content, newFakeQuiz(), newFakeProgress(), newFakeAttempts(), stats, newFakeBadges())
+
+	if _, err := svc.CompletePractice(context.Background(), 7, "lesson-2"); !errors.Is(err, domain.ErrLessonLocked) {
+		t.Fatalf("expected ErrLessonLocked, got %v", err)
+	}
+	if got, err := stats.Get(context.Background(), 7); !errors.Is(err, domain.ErrNotFound) && got != nil && got.XP != 0 {
+		t.Fatalf("locked practice awarded XP: %+v", got)
+	}
+
+	if _, err := svc.CompleteLesson(context.Background(), 7, "lesson-1"); !errors.Is(err, domain.ErrPracticeRequired) {
+		t.Fatalf("expected ErrPracticeRequired for first lesson, got %v", err)
+	}
+	if _, err := svc.CompletePractice(context.Background(), 7, "lesson-1"); err != nil {
+		t.Fatalf("complete first practice: %v", err)
+	}
+	if _, err := svc.CompleteLesson(context.Background(), 7, "lesson-1"); err != nil {
+		t.Fatalf("complete first lesson: %v", err)
+	}
+	if _, err := svc.CompletePractice(context.Background(), 7, "lesson-2"); err != nil {
+		t.Fatalf("practice should unlock after first lesson: %v", err)
+	}
+}
+
 func TestApplyStreak(t *testing.T) {
 	now := time.Date(2026, 11, 1, 15, 0, 0, 0, time.UTC)
 	yesterday := now.AddDate(0, 0, -1)
@@ -415,6 +444,20 @@ func TestCertificateIgnoresCareerTracks(t *testing.T) {
 	}
 	if cert.Code == "" || cert.IssuedAt == nil {
 		t.Fatalf("certificate missing issue data: %+v", cert)
+	}
+
+	publicCert, err := svc.PublicCertificate(context.Background(), cert.Code)
+	if err != nil {
+		t.Fatalf("PublicCertificate: %v", err)
+	}
+	if publicCert.Name != "Rina" || publicCert.Code != cert.Code || publicCert.IssuedAt == nil {
+		t.Fatalf("unexpected public certificate: %+v", publicCert)
+	}
+	if _, err := svc.PublicCertificate(context.Background(), "GL-1-261201"); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("future certificate code should be rejected, got %v", err)
+	}
+	if _, err := svc.PublicCertificate(context.Background(), "bukan-kode"); !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("malformed certificate code should be rejected, got %v", err)
 	}
 
 	statsRes, err := svc.Stats(context.Background(), user.ID)

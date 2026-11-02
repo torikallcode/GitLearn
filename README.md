@@ -15,12 +15,12 @@ browser, commit graph real-time, dan kuis — tanpa risiko merusak repository.
 ## Fitur
 
 - Autentikasi JWT (register, login, refresh, profil, career goal).
-- Katalog 5 jalur: Fundamental, GitHub Collaboration, Profesional, Frontend, Backend (46 lesson).
+- Katalog 5 jalur: Fundamental, GitHub Collaboration, Profesional, Frontend, Backend (47 lesson).
 - Lesson split-view: teori Markdown + terminal simulator + commit graph + hint bertingkat.
 - 25+ command Git disimulasikan: `init` → `merge`, `rebase`, `reflog`, `bisect`, `stash`, dan lainnya.
 - Validasi praktik berbasis state repo, reset sandbox kapan saja.
 - Kuis dengan penjelasan, skor, dan spaced repetition untuk jawaban salah.
-- Progress tracking, sequential unlock, XP, streak, badge, dan sertifikat (cetak/PDF).
+- Progress tracking, sequential unlock, XP, streak, badge, dan sertifikat (cetak/PDF + halaman publik yang bisa dibagikan).
 - Pencarian lesson/command, cheat sheet, dark mode, responsive + aksesibilitas dasar.
 
 ## Menjalankan
@@ -32,18 +32,18 @@ cp backend/.env.example backend/.env   # opsional, ubah JWT_SECRET
 docker compose up --build
 ```
 
-- Web: http://localhost:5173
+- Web: http://localhost:8081
 - API: http://localhost:8080/api/v1/health
 - MySQL: localhost:3306 (user/password `gitlearn`)
 
-Migrasi + seed kurikulum dijalankan otomatis oleh container API.
+Migrasi + seed kurikulum dijalankan otomatis oleh container `migrate` dan `seed` sebelum API start.
 
 ### Manual
 
 ```bash
 # 1. Database
-mysql -u root -p -e "CREATE DATABASE gitlearn CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mysql -u root -p -e "CREATE USER 'gitlearn'@'localhost' IDENTIFIED BY 'gitlearn'; GRANT ALL ON gitlearn.* TO 'gitlearn'@'localhost';"
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS gitlearn CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p -e "CREATE USER IF NOT EXISTS 'gitlearn'@'localhost' IDENTIFIED BY 'gitlearn'; CREATE USER IF NOT EXISTS 'gitlearn'@'127.0.0.1' IDENTIFIED BY 'gitlearn'; GRANT ALL ON gitlearn.* TO 'gitlearn'@'localhost'; GRANT ALL ON gitlearn.* TO 'gitlearn'@'127.0.0.1'; FLUSH PRIVILEGES;"
 
 # 2. Backend
 cd backend
