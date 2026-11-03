@@ -20,6 +20,10 @@ type Config struct {
 	JWTRefreshTTL      time.Duration
 	CORSOrigins        []string
 	RateLimitPerMinute int
+	FrontendURL        string
+	GitHubClientID     string
+	GitHubClientSecret string
+	GitHubRedirectURL  string
 }
 
 const defaultJWTSecret = "gitlearn-development-secret-change-me"
@@ -73,6 +77,10 @@ func Load() (*Config, error) {
 		JWTRefreshTTL:      refreshTTL,
 		CORSOrigins:        origins,
 		RateLimitPerMinute: rateLimit,
+		FrontendURL:        strings.TrimRight(env("FRONTEND_URL", "http://localhost:5173"), "/"),
+		GitHubClientID:     env("GITHUB_CLIENT_ID", ""),
+		GitHubClientSecret: env("GITHUB_CLIENT_SECRET", ""),
+		GitHubRedirectURL:  env("GITHUB_REDIRECT_URL", "http://localhost:8080/api/v1/auth/github/callback"),
 	}, nil
 }
 

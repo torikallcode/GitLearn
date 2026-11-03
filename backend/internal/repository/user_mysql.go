@@ -6,8 +6,8 @@ import (
 	"errors"
 	"time"
 
-	mysqlDriver "github.com/go-sql-driver/mysql"
 	"github.com/gitlearn/backend/internal/domain"
+	mysqlDriver "github.com/go-sql-driver/mysql"
 )
 
 type userRepository struct {
@@ -20,9 +20,13 @@ func NewUserRepository(db *sql.DB) UserRepository {
 }
 
 func (r *userRepository) Create(ctx context.Context, user *domain.User) error {
+	role := user.Role
+	if role == "" {
+		role = domain.RoleLearner
+	}
 	res, err := r.db.ExecContext(ctx,
-		`INSERT INTO users (name, email, password_hash, career_goal, level) VALUES (?, ?, ?, ?, ?)`,
-		user.Name, user.Email, user.PasswordHash, user.CareerGoal, user.Level,
+		`INSERT INTO users (name, email, password_hash, career_goal, level, role) VALUES (?, ?, ?, ?, ?, ?)`,
+		user.Name, user.Email, user.PasswordHash, user.CareerGoal, user.Level, role,
 	)
 	if err != nil {
 		if isDuplicate(err) {
@@ -43,12 +47,12 @@ func (r *userRepository) Create(ctx context.Context, user *domain.User) error {
 
 func (r *userRepository) GetByID(ctx context.Context, id uint64) (*domain.User, error) {
 	return scanUser(r.db.QueryRowContext(ctx,
-		`SELECT id, name, email, password_hash, career_goal, level, created_at, updated_at FROM users WHERE id = ?`, id))
+		`SELECT id, name, email, password_hash, career_goal, level, role, created_at, updated_at FROM users WHERE id = ?`, id))
 }
 
 func (r *userRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
 	return scanUser(r.db.QueryRowContext(ctx,
-		`SELECT id, name, email, password_hash, career_goal, level, created_at, updated_at FROM users WHERE email = ?`, email))
+		`SELECT id, name, email, password_hash, career_goal, level, role, created_at, updated_at FROM users WHERE email = ?`, email))
 }
 
 func (r *userRepository) Update(ctx context.Context, user *domain.User) error {
@@ -69,7 +73,7 @@ type rowScanner interface {
 
 func scanUser(row rowScanner) (*domain.User, error) {
 	var u domain.User
-	err := row.Scan(&u.ID, &u.Name, &u.Email, &u.PasswordHash, &u.CareerGoal, &u.Level, &u.CreatedAt, &u.UpdatedAt)
+	err := row.Scan(&u.ID, &u.Name, &u.Email, &u.PasswordHash, &u.CareerGoal, &u.Level, &u.Role, &u.CreatedAt, &u.UpdatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, domain.ErrNotFound
 	}

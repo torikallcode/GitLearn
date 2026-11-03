@@ -19,6 +19,7 @@ type AuthService interface {
 	Refresh(ctx context.Context, refreshToken string) (*dto.RefreshResponse, error)
 	Me(ctx context.Context, userID uint64) (*dto.User, error)
 	UpdateProfile(ctx context.Context, userID uint64, req dto.UpdateProfileRequest) (*dto.User, error)
+	OAuthLogin(ctx context.Context, email, name string) (*dto.AuthResponse, error)
 }
 
 type authService struct {
@@ -83,7 +84,57 @@ func (s *authService) Register(ctx context.Context, req dto.RegisterRequest) (*d
 	}
 
 	return &dto.AuthResponse{
-		User:         dto.User{ID: user.ID, Name: user.Name, Email: user.Email, CareerGoal: user.CareerGoal, Level: user.Level, CreatedAt: user.CreatedAt, Stats: mapStats(*stats)},
+		User:         dto.User{ID: user.ID, Name: user.Name, Email: user.Email, CareerGoal: user.CareerGoal, Level: user.Level, Role: roleOrLearner(user.Role), CreatedAt: user.CreatedAt, Stats: mapStats(*stats)},
+		AccessToken:  access,
+		RefreshToken: refresh,
+	}, nil
+}
+
+func (s *authService) OAuthLogin(ctx context.Context, email, name string) (*dto.AuthResponse, error) {
+	email = normalizeEmail(email)
+	if email == "" {
+		return nil, domain.WrapValidation("email", "akun GitHub tidak memiliki email terverifikasi")
+	}
+	displayName := strings.TrimSpace(name)
+	if displayName == "" {
+		displayName = "GitHub Learner"
+	}
+
+	user, err := s.users.GetByEmail(ctx, email)
+	if errors.Is(err, domain.ErrNotFound) {
+		user = &domain.User{
+			Name:       displayName,
+			Email:      email,
+			CareerGoal: "",
+			Level:      domain.LevelBeginner,
+			Role:       domain.RoleLearner,
+		}
+		if err := s.users.Create(ctx, user); err != nil {
+			return nil, err
+		}
+		if err := s.stats.Save(ctx, &domain.Stats{UserID: user.ID}); err != nil {
+			return nil, err
+		}
+	} else if err != nil {
+		return nil, err
+	}
+
+	stats, err := s.stats.Get(ctx, user.ID)
+	if errors.Is(err, domain.ErrNotFound) {
+		stats = &domain.Stats{UserID: user.ID}
+		if err := s.stats.Save(ctx, stats); err != nil {
+			return nil, err
+		}
+	} else if err != nil {
+		return nil, err
+	}
+
+	access, refresh, err := s.tokens.GeneratePair(user.ID)
+	if err != nil {
+		return nil, err
+	}
+	return &dto.AuthResponse{
+		User:         dto.User{ID: user.ID, Name: user.Name, Email: user.Email, CareerGoal: user.CareerGoal, Level: user.Level, Role: roleOrLearner(user.Role), CreatedAt: user.CreatedAt, Stats: mapStats(*stats)},
 		AccessToken:  access,
 		RefreshToken: refresh,
 	}, nil
@@ -189,9 +240,17 @@ func (s *authService) userDTO(ctx context.Context, user *domain.User) (*dto.User
 		Email:      user.Email,
 		CareerGoal: user.CareerGoal,
 		Level:      user.Level,
+		Role:       roleOrLearner(user.Role),
 		CreatedAt:  user.CreatedAt,
 		Stats:      mapStats(*stats),
 	}, nil
+}
+
+func roleOrLearner(role string) string {
+	if role == "" {
+		return domain.RoleLearner
+	}
+	return role
 }
 
 func normalizeEmail(email string) string {

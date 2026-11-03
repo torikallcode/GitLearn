@@ -14,6 +14,7 @@ export default function Login() {
   const { setSession } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const oauthError = new URLSearchParams(location.search).get('oauth_error')
 
   function update(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -46,7 +47,7 @@ export default function Login() {
       footer={<AuthFooterLink text="Belum punya akun?" to="/register" label="Daftar gratis" />}
     >
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
-        <FormError>{error}</FormError>
+        <FormError>{error || (oauthError ? 'Login GitHub gagal. Coba lagi atau masuk dengan email.' : '')}</FormError>
         <Field label="Email" htmlFor="email">
           <input
             id="email"
@@ -85,6 +86,17 @@ export default function Login() {
           {loading ? <Spinner className="h-4 w-4" /> : null}
           {loading ? 'Memproses…' : 'Masuk'}
         </Button>
+        <div className="flex items-center gap-3 pt-1">
+          <span className="h-px flex-1 bg-ink-200 dark:bg-ink-700" />
+          <span className="text-[11px] uppercase tracking-widest text-ink-400">atau</span>
+          <span className="h-px flex-1 bg-ink-200 dark:bg-ink-700" />
+        </div>
+        <a
+          href="/api/v1/auth/github"
+          className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-ink-900 text-sm font-semibold text-white hover:bg-ink-800 dark:bg-white dark:text-ink-900 dark:hover:bg-ink-100"
+        >
+          Masuk dengan GitHub
+        </a>
       </form>
     </AuthShell>
   )

@@ -14,13 +14,15 @@ browser, commit graph real-time, dan kuis — tanpa risiko merusak repository.
 
 ## Fitur
 
-- Autentikasi JWT (register, login, refresh, profil, career goal).
+- Autentikasi JWT (register, login, refresh, profil, career goal) + login GitHub OAuth opsional.
 - Katalog 5 jalur: Fundamental, GitHub Collaboration, Profesional, Frontend, Backend (47 lesson).
 - Lesson split-view: teori Markdown + terminal simulator + commit graph + hint bertingkat.
 - 25+ command Git disimulasikan: `init` → `merge`, `rebase`, `reflog`, `bisect`, `stash`, dan lainnya.
 - Validasi praktik berbasis state repo, reset sandbox kapan saja.
 - Kuis dengan penjelasan, skor, dan spaced repetition untuk jawaban salah.
 - Progress tracking, sequential unlock, XP, streak, badge, dan sertifikat (cetak/PDF + halaman publik yang bisa dibagikan).
+- Peringkat XP publik, diskusi per lesson, dan CMS admin untuk mengelola lesson/kuis.
+- Tes penempatan singkat saat onboarding untuk menyarankan level awal.
 - Pencarian lesson/command, cheat sheet, dark mode, responsive + aksesibilitas dasar.
 
 ## Menjalankan
@@ -65,10 +67,12 @@ Vite mem-proxy `/api` ke `http://localhost:8080`.
 ```bash
 cd backend && go test ./...
 cd frontend && npm test && npm run build
+cd frontend && npx playwright install chromium && npm run test:e2e
 ```
 
-CI (`.github/workflows/ci.yml`) menjalankan vet, unit test Go, unit test engine simulator, build frontend, dan build
-Docker.
+CI (`.github/workflows/ci.yml`) menjalankan vet, unit test Go, unit test engine simulator, E2E smoke Playwright,
+build frontend, dan build Docker. `.github/workflows/deploy.yml` mem-publish image ke GHCR saat tag `v*` dibuat dan
+menjalankan deploy SSH bila `DEPLOY_HOST`/`DEPLOY_PATH` (vars) serta `DEPLOY_USER`/`DEPLOY_SSH_KEY` (secrets) diisi.
 
 ## Struktur
 
@@ -96,7 +100,10 @@ docs/                         # API, schema seed, kontrak simulator
 
 ## Catatan cakupan
 
-MVP dan Fase 2 (engagement) diimplementasikan penuh. Beberapa item Fase 3 disertakan: pencarian, dark mode, explain
-command, sertifikat, dan latihan command lanjutan (`rebase`, `bisect`, `reflog`, `cherry-pick`). Integrasi GitHub OAuth
-langsung ke repo pengguna, leaderboard/komunitas, dan admin CMS tetap berada di roadmap karena membutuhkan layanan
-eksternal di luar sandbox.
+MVP, Fase 2 (engagement), dan fitur Fase 3 yang tidak butuh layanan eksternal sudah diimplementasikan: pencarian,
+dark mode, explain command, sertifikat, latihan command lanjutan (`rebase`, `bisect`, `reflog`, `cherry-pick`), tes
+penempatan, leaderboard, diskusi lesson, admin CMS, E2E smoke, dan pipeline publish/deploy.
+
+GitHub OAuth login sudah tersedia (opsional): buat GitHub OAuth App, isi `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`,
+`GITHUB_REDIRECT_URL`, dan `FRONTEND_URL`, lalu callback diarahkan ke `/oauth/callback` frontend. Tanpa kredensial,
+tombol GitHub menampilkan `501 GITHUB_OAUTH_NOT_CONFIGURED` dan login email/password tetap berjalan normal.

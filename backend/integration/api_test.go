@@ -100,14 +100,21 @@ func TestCriticalAPIFlows(t *testing.T) {
 	}
 
 	tokens := jwt.NewManager("integration-secret", 15*time.Minute, 24*time.Hour)
+	users := repository.NewUserRepository(db)
+	quizRepo := repository.NewQuizRepository(db)
 	engine := router.New(router.Deps{
-		Auth:               handler.NewAuthHandler(service.NewAuthService(repository.NewUserRepository(db), repository.NewStatsRepository(db), tokens)),
-		Content:            handler.NewContentHandler(service.NewContentService(repository.NewContentRepository(db), repository.NewQuizRepository(db), repository.NewProgressRepository(db))),
-		Progress:           handler.NewProgressHandler(service.NewProgressService(repository.NewContentRepository(db), repository.NewQuizRepository(db), repository.NewProgressRepository(db), repository.NewAttemptRepository(db), repository.NewStatsRepository(db), repository.NewBadgeRepository(db))),
-		Quiz:               handler.NewQuizHandler(service.NewQuizService(repository.NewQuizRepository(db), repository.NewProgressRepository(db), repository.NewAttemptRepository(db), repository.NewReviewRepository(db))),
-		Engagement:         handler.NewEngagementHandler(service.NewEngagementService(repository.NewContentRepository(db), repository.NewProgressRepository(db), repository.NewStatsRepository(db), repository.NewBadgeRepository(db), repository.NewUserRepository(db))),
+		Auth:               handler.NewAuthHandler(service.NewAuthService(users, repository.NewStatsRepository(db), tokens)),
+		OAuth:              handler.NewOAuthHandler(service.NewAuthService(users, repository.NewStatsRepository(db), tokens), "", "", "", "http://localhost:5173"),
+		Content:            handler.NewContentHandler(service.NewContentService(repository.NewContentRepository(db), quizRepo, repository.NewProgressRepository(db))),
+		Progress:           handler.NewProgressHandler(service.NewProgressService(repository.NewContentRepository(db), quizRepo, repository.NewProgressRepository(db), repository.NewAttemptRepository(db), repository.NewStatsRepository(db), repository.NewBadgeRepository(db))),
+		Quiz:               handler.NewQuizHandler(service.NewQuizService(quizRepo, repository.NewProgressRepository(db), repository.NewAttemptRepository(db), repository.NewReviewRepository(db))),
+		Engagement:         handler.NewEngagementHandler(service.NewEngagementService(repository.NewContentRepository(db), repository.NewProgressRepository(db), repository.NewStatsRepository(db), repository.NewBadgeRepository(db), users)),
+		Community:          handler.NewCommunityHandler(service.NewCommunityService(repository.NewContentRepository(db), repository.NewCommentRepository(db), users)),
+		Leaderboard:        handler.NewLeaderboardHandler(service.NewLeaderboardService(repository.NewLeaderboardRepository(db))),
+		Admin:              handler.NewAdminHandler(service.NewAdminService(repository.NewAdminRepository(db), quizRepo)),
 		Health:             handler.NewHealthHandler(db),
 		Tokens:             tokens,
+		Users:              users,
 		CORSOrigins:        []string{"http://localhost:5173"},
 		RateLimitPerMinute: 0,
 	})

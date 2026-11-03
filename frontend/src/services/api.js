@@ -118,4 +118,19 @@ export const api = {
   stats: () => request('/stats'),
   certificate: () => request('/certificate'),
   publicCertificate: (code) => request(`/certificates/${encodeURIComponent(code)}`, { auth: false }),
+
+  leaderboard: (limit = 20) => request(`/leaderboard?limit=${limit}`),
+  comments: (slug) => request(`/lessons/${encodeURIComponent(slug)}/comments`, { auth: false }),
+  addComment: (slug, content) =>
+    request(`/lessons/${encodeURIComponent(slug)}/comments`, { method: 'POST', body: { content } }),
+  deleteComment: (id) => request(`/comments/${id}`, { method: 'DELETE' }),
+
+  adminLessons: () => request('/admin/lessons'),
+  adminLesson: (id) => request(`/admin/lessons/${id}`),
+  adminUpdateLesson: (id, body) => request(`/admin/lessons/${id}`, { method: 'PATCH', body }),
+  adminQuizzes: (lessonId) => request(`/admin/lessons/${lessonId}/quizzes`),
+  adminCreateQuiz: (lessonId, body) =>
+    request(`/admin/lessons/${lessonId}/quizzes`, { method: 'POST', body }),
+  adminUpdateQuiz: (id, body) => request(`/admin/quizzes/${id}`, { method: 'PATCH', body }),
+  adminDeleteQuiz: (id) => request(`/admin/quizzes/${id}`, { method: 'DELETE' }),
 }

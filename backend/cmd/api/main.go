@@ -74,21 +74,32 @@ func run() error {
 	progress := repository.NewProgressRepository(db)
 	attempts := repository.NewAttemptRepository(db)
 	reviews := repository.NewReviewRepository(db)
+	comments := repository.NewCommentRepository(db)
+	leaderboard := repository.NewLeaderboardRepository(db)
+	adminContent := repository.NewAdminRepository(db)
 
 	authService := service.NewAuthService(users, stats, tokens)
 	contentService := service.NewContentService(content, quizzes, progress)
 	progressService := service.NewProgressService(content, quizzes, progress, attempts, stats, badges)
 	quizService := service.NewQuizService(quizzes, progress, attempts, reviews)
 	engagementService := service.NewEngagementService(content, progress, stats, badges, users)
+	communityService := service.NewCommunityService(content, comments, users)
+	leaderboardService := service.NewLeaderboardService(leaderboard)
+	adminService := service.NewAdminService(adminContent, quizzes)
 
 	engine := router.New(router.Deps{
 		Auth:               handler.NewAuthHandler(authService),
+		OAuth:              handler.NewOAuthHandler(authService, cfg.GitHubClientID, cfg.GitHubClientSecret, cfg.GitHubRedirectURL, cfg.FrontendURL),
 		Content:            handler.NewContentHandler(contentService),
 		Progress:           handler.NewProgressHandler(progressService),
 		Quiz:               handler.NewQuizHandler(quizService),
 		Engagement:         handler.NewEngagementHandler(engagementService),
+		Community:          handler.NewCommunityHandler(communityService),
+		Leaderboard:        handler.NewLeaderboardHandler(leaderboardService),
+		Admin:              handler.NewAdminHandler(adminService),
 		Health:             handler.NewHealthHandler(db),
 		Tokens:             tokens,
+		Users:              users,
 		CORSOrigins:        cfg.CORSOrigins,
 		RateLimitPerMinute: cfg.RateLimitPerMinute,
 	})

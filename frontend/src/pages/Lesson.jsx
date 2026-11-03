@@ -25,6 +25,7 @@ import CommitGraph from '../features/git-simulator/components/CommitGraph'
 import TaskPanel from '../features/git-simulator/components/TaskPanel'
 import ExplainCommand from '../features/git-simulator/components/ExplainCommand'
 import QuizRunner from '../features/quiz/QuizRunner'
+import Comments from '../features/community/Comments'
 import { statusLabel } from '../utils/format'
 
 export default function Lesson() {
@@ -391,6 +392,8 @@ export default function Lesson() {
           ))}
         </div>
       )}
+
+      <Comments slug={slug} />
     </div>
   )
 }

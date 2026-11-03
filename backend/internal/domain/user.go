@@ -10,6 +10,7 @@ type User struct {
 	PasswordHash string    `json:"-"`
 	CareerGoal   string    `json:"career_goal"`
 	Level        string    `json:"level"`
+	Role         string    `json:"role"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
@@ -31,4 +32,7 @@ const (
 	LevelBeginner     = "beginner"
 	LevelIntermediate = "intermediate"
 	LevelAdvanced     = "advanced"
+
+	RoleLearner = "learner"
+	RoleAdmin   = "admin"
 )

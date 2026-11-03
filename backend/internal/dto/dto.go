@@ -24,6 +24,7 @@ type User struct {
 	Email      string    `json:"email"`
 	CareerGoal string    `json:"career_goal"`
 	Level      string    `json:"level"`
+	Role       string    `json:"role"`
 	CreatedAt  time.Time `json:"created_at"`
 	Stats      Stats     `json:"stats"`
 }
@@ -303,4 +304,87 @@ type Health struct {
 	Status string    `json:"status"`
 	Time   time.Time `json:"time"`
 	DB     string    `json:"db"`
+}
+
+// Comment is one lesson discussion message.
+type Comment struct {
+	ID         uint64    `json:"id"`
+	LessonID   uint64    `json:"lesson_id"`
+	LessonSlug string    `json:"lesson_slug"`
+	UserID     uint64    `json:"user_id"`
+	UserName   string    `json:"user_name"`
+	Content    string    `json:"content"`
+	CreatedAt  time.Time `json:"created_at"`
+}
+
+// CreateCommentRequest is POST /lessons/:slug/comments.
+type CreateCommentRequest struct {
+	Content string `json:"content" validate:"required,min=2,max=2000"`
+}
+
+// LeaderboardEntry is one row of GET /leaderboard.
+type LeaderboardEntry struct {
+	Rank          int    `json:"rank"`
+	UserID        uint64 `json:"user_id"`
+	Name          string `json:"name"`
+	XP            int    `json:"xp"`
+	CurrentStreak int    `json:"current_streak"`
+	LongestStreak int    `json:"longest_streak"`
+}
+
+// AdminLesson is the editable lesson projection used by the CMS.
+type AdminLesson struct {
+	ID               uint64 `json:"id"`
+	ModuleID         uint64 `json:"module_id"`
+	Slug             string `json:"slug"`
+	Title            string `json:"title"`
+	ContentMD        string `json:"content_md"`
+	EstimatedMinutes int    `json:"estimated_minutes"`
+	OrderNo          int    `json:"order_no"`
+	IsPublished      bool   `json:"is_published"`
+	ModuleTitle      string `json:"module_title"`
+	PathSlug         string `json:"path_slug"`
+	PathTitle        string `json:"path_title"`
+	QuizCount        int    `json:"quiz_count"`
+}
+
+// UpdateLessonRequest is PATCH /admin/lessons/:id.
+type UpdateLessonRequest struct {
+	Title            *string `json:"title" validate:"omitempty,min=2,max=200"`
+	ContentMD        *string `json:"content_md" validate:"omitempty,min=1"`
+	EstimatedMinutes *int    `json:"estimated_minutes" validate:"omitempty,min=1,max=600"`
+	OrderNo          *int    `json:"order_no" validate:"omitempty,min=0"`
+	IsPublished      *bool   `json:"is_published"`
+}
+
+// AdminQuizOption is an editable answer choice.
+type AdminQuizOption struct {
+	ID         uint64 `json:"id"`
+	OptionText string `json:"option_text"`
+	IsCorrect  bool   `json:"is_correct"`
+	OrderNo    int    `json:"order_no"`
+}
+
+// AdminQuiz is an editable quiz with its options.
+type AdminQuiz struct {
+	ID          uint64            `json:"id"`
+	LessonID    uint64            `json:"lesson_id"`
+	Question    string            `json:"question"`
+	Explanation string            `json:"explanation"`
+	OrderNo     int               `json:"order_no"`
+	Options     []AdminQuizOption `json:"options"`
+}
+
+// QuizOptionInput is one option in a quiz create/update payload.
+type QuizOptionInput struct {
+	OptionText string `json:"option_text" validate:"required,min=1,max=500"`
+	IsCorrect  bool   `json:"is_correct"`
+}
+
+// QuizUpsertRequest is POST /admin/lessons/:id/quizzes and PATCH /admin/quizzes/:id.
+type QuizUpsertRequest struct {
+	Question    string            `json:"question" validate:"required,min=3"`
+	Explanation string            `json:"explanation" validate:"required,min=3"`
+	OrderNo     int               `json:"order_no" validate:"omitempty,min=0"`
+	Options     []QuizOptionInput `json:"options" validate:"required,min=2,dive"`
 }

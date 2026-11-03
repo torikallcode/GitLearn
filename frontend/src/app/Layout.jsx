@@ -15,6 +15,7 @@ import {
   SearchIcon,
   SunIcon,
   TerminalIcon,
+  TrophyIcon,
   UserIcon,
 } from '../components/icons'
 import SearchModal from './SearchModal'
@@ -23,6 +24,8 @@ const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: HomeIcon, auth: true },
   { to: '/paths', label: 'Jalur Belajar', icon: MapIcon },
   { to: '/cheatsheet', label: 'Cheat Sheet', icon: BookIcon },
+  { to: '/leaderboard', label: 'Peringkat', icon: TrophyIcon },
+  { to: '/admin', label: 'Admin', icon: TerminalIcon, admin: true },
 ]
 
 export default function Layout() {
@@ -79,7 +82,7 @@ export default function Layout() {
 
           <nav className="ml-6 hidden items-center gap-1 md:flex" aria-label="Navigasi utama">
             {navItems
-              .filter((item) => !item.auth || accessToken)
+              .filter((item) => (!item.auth || accessToken) && (!item.admin || user?.role === 'admin'))
               .map(({ to, label, icon: Icon }) => (
                 <NavLink
                   key={to}
@@ -210,7 +213,7 @@ export default function Layout() {
           <nav className="border-t border-ink-200 bg-white px-4 py-3 dark:border-ink-800 dark:bg-ink-950 md:hidden">
             <div className="flex flex-col gap-1">
               {navItems
-                .filter((item) => !item.auth || accessToken)
+                .filter((item) => (!item.auth || accessToken) && (!item.admin || user?.role === 'admin'))
                 .map(({ to, label, icon: Icon }) => (
                   <NavLink
                     key={to}

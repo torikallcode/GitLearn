@@ -15,6 +15,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/gitlearn/backend/internal/config"
+	"github.com/gitlearn/backend/internal/pkg/hash"
 )
 
 const defaultDSN = "gitlearn:gitlearn@tcp(127.0.0.1:3306)/gitlearn?parseTime=true&multiStatements=true&charset=utf8mb4"
@@ -140,9 +141,37 @@ func run(dir string) error {
 		return fmt.Errorf("seed badges (did you run migrations?): %w", err)
 	}
 
-	fmt.Printf("seed complete: paths=%d modules=%d lessons=%d quizzes=%d options=%d cheatsheet=%d badges=%d\n",
-		c.paths, c.modules, c.lessons, c.quizzes, c.options, c.cheatsheet, c.badges)
+	adminSeeded, err := seedAdmin(ctx, db)
+	if err != nil {
+		return fmt.Errorf("seed admin: %w", err)
+	}
+
+	fmt.Printf("seed complete: paths=%d modules=%d lessons=%d quizzes=%d options=%d cheatsheet=%d badges=%d admin=%d\n",
+		c.paths, c.modules, c.lessons, c.quizzes, c.options, c.cheatsheet, c.badges, adminSeeded)
 	return nil
+}
+
+// seedAdmin creates or promotes the CMS account when ADMIN_EMAIL and
+// ADMIN_PASSWORD are provided. Without them no admin account is created.
+func seedAdmin(ctx context.Context, db *sql.DB) (int, error) {
+	email := strings.ToLower(strings.TrimSpace(os.Getenv("ADMIN_EMAIL")))
+	password := os.Getenv("ADMIN_PASSWORD")
+	if email == "" || password == "" {
+		return 0, nil
+	}
+	hashed, err := hash.Password(password)
+	if err != nil {
+		return 0, err
+	}
+	if _, err := db.ExecContext(ctx,
+		`INSERT INTO users (name, email, password_hash, career_goal, level, role)
+		 VALUES ('Admin GitLearn', ?, ?, '', 'advanced', 'admin')
+		 ON DUPLICATE KEY UPDATE role = 'admin', password_hash = VALUES(password_hash)`,
+		email, hashed,
+	); err != nil {
+		return 0, err
+	}
+	return 1, nil
 }
 
 func seedCurriculum(ctx context.Context, db *sql.DB, cur curriculum, c *counts) error {

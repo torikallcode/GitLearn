@@ -19,6 +19,9 @@ const Profile = lazy(() => import('../pages/Profile'))
 const Review = lazy(() => import('../pages/Review'))
 const Certificate = lazy(() => import('../pages/Certificate'))
 const PublicCertificate = lazy(() => import('../pages/PublicCertificate'))
+const Leaderboard = lazy(() => import('../pages/Leaderboard'))
+const Admin = lazy(() => import('../pages/Admin'))
+const OAuthCallback = lazy(() => import('../pages/OAuthCallback'))
 
 function Protected({ children }) {
   const { accessToken } = useAuth()
@@ -30,6 +33,14 @@ function Protected({ children }) {
 function GuestOnly({ children }) {
   const { accessToken } = useAuth()
   return accessToken ? <Navigate to="/dashboard" replace /> : children
+}
+
+function AdminOnly({ children }) {
+  const { accessToken, user } = useAuth()
+  if (!accessToken) return <Navigate to="/login" replace />
+  if (!user) return <PageLoader label="Memeriksa akses…" />
+  if (user.role !== 'admin') return <Navigate to="/dashboard" replace />
+  return children
 }
 
 export default function App() {
@@ -90,10 +101,20 @@ export default function App() {
             }
           />
           <Route path="paths" element={<Paths />} />
+          <Route path="oauth/callback" element={<OAuthCallback />} />
           <Route path="paths/:slug" element={<PathDetail />} />
           <Route path="lessons/:slug" element={<Lesson />} />
           <Route path="cheatsheet" element={<CheatSheet />} />
+          <Route path="leaderboard" element={<Leaderboard />} />
           <Route path="certificate/:code" element={<PublicCertificate />} />
+          <Route
+            path="admin"
+            element={
+              <AdminOnly>
+                <Admin />
+              </AdminOnly>
+            }
+          />
           <Route
             path="review"
             element={

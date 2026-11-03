@@ -59,6 +59,7 @@ type LessonContext struct {
 	PathTitle     string
 	PathOrderNo   int
 	PathTrack     string
+	QuizCount     int
 }
 
 // Quiz is a multiple-choice question.

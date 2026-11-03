@@ -26,12 +26,15 @@ Auth: `Authorization: Bearer <access_token>`.
 | POST | `/auth/register` | `{name,email,password,career_goal?,level?}` | `{user,access_token,refresh_token}` |
 | POST | `/auth/login` | `{email,password}` | `{user,access_token,refresh_token}` |
 | POST | `/auth/refresh` | `{refresh_token}` | `{access_token,refresh_token}` |
+| GET | `/auth/github` | – | redirect ke GitHub (501 bila belum dikonfigurasi) |
+| GET | `/auth/github/callback` | – | redirect ke `${FRONTEND_URL}/oauth/callback#access_token=…&refresh_token=…` |
 | GET | `/auth/me` | – | `user` |
 | PATCH | `/users/me` | `{name?,career_goal?,level?}` | `user` |
 
-`user`: `{id,name,email,career_goal,level,created_at,stats:{xp,current_streak,longest_streak,last_active_date}}`
+`user`: `{id,name,email,career_goal,level,role,created_at,stats:{xp,current_streak,longest_streak,last_active_date}}`
 
 `career_goal`: `frontend` \| `backend` \| `""`. `level`: `beginner` \| `intermediate` \| `advanced`.
+`role`: `learner` \| `admin`.
 
 ## Content
 
@@ -82,3 +85,37 @@ Auth: `Authorization: Bearer <access_token>`.
 | Method | Endpoint | Data |
 |---|---|---|
 | GET | `/health` | `{status:"ok",time,db:"up"}` |
+
+## Community
+
+| Method | Endpoint | Body | Data |
+|---|---|---|---|
+| GET | `/lessons/:slug/comments` | – | `[comment]` |
+| POST | `/lessons/:slug/comments` | `{content}` | `comment` |
+| DELETE | `/comments/:id` | – | `{deleted:true}` (author or admin) |
+
+`comment`: `{id,lesson_id,lesson_slug,user_id,user_name,content,created_at}`.
+
+## Leaderboard
+
+| Method | Endpoint | Data |
+|---|---|---|
+| GET | `/leaderboard?limit=20` | `[{rank,user_id,name,xp,current_streak,longest_streak}]` |
+
+## Admin (role `admin`)
+
+| Method | Endpoint | Body | Data |
+|---|---|---|---|
+| GET | `/admin/lessons` | – | `[admin_lesson]` |
+| GET | `/admin/lessons/:id` | – | `admin_lesson` |
+| PATCH | `/admin/lessons/:id` | `{title?,content_md?,estimated_minutes?,order_no?,is_published?}` | `admin_lesson` |
+| GET | `/admin/lessons/:id/quizzes` | – | `[admin_quiz]` |
+| POST | `/admin/lessons/:id/quizzes` | `{question,explanation,order_no,options:[{option_text,is_correct}]}` | `admin_quiz` |
+| PATCH | `/admin/quizzes/:id` | same as create | `admin_quiz` |
+| DELETE | `/admin/quizzes/:id` | – | `{deleted:true}` |
+
+`admin_lesson`: `{id,module_id,slug,title,content_md,estimated_minutes,order_no,is_published,module_title,path_slug,path_title,quiz_count}`.
+`admin_quiz`: `{id,lesson_id,question,explanation,order_no,options:[{id,option_text,is_correct,order_no}]}`.
+Exactly one option must have `is_correct: true`.
+
+Bootstrap an admin account by setting `ADMIN_EMAIL` and `ADMIN_PASSWORD` before running `go run ./cmd/seed`.

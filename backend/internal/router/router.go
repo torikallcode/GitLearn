@@ -6,19 +6,25 @@ import (
 	"github.com/gitlearn/backend/internal/middleware"
 	"github.com/gitlearn/backend/internal/pkg/jwt"
 	"github.com/gitlearn/backend/internal/pkg/response"
+	"github.com/gitlearn/backend/internal/repository"
 )
 
 // Deps contains every dependency the HTTP layer needs. Handlers are already
 // wired with their services by cmd/api/main.go.
 type Deps struct {
-	Auth       *handler.AuthHandler
-	Content    *handler.ContentHandler
-	Progress   *handler.ProgressHandler
-	Quiz       *handler.QuizHandler
-	Engagement *handler.EngagementHandler
-	Health     *handler.HealthHandler
+	Auth        *handler.AuthHandler
+	OAuth       *handler.OAuthHandler
+	Content     *handler.ContentHandler
+	Progress    *handler.ProgressHandler
+	Quiz        *handler.QuizHandler
+	Engagement  *handler.EngagementHandler
+	Community   *handler.CommunityHandler
+	Leaderboard *handler.LeaderboardHandler
+	Admin       *handler.AdminHandler
+	Health      *handler.HealthHandler
 
 	Tokens             *jwt.Manager
+	Users              repository.UserRepository
 	CORSOrigins        []string
 	RateLimitPerMinute int
 }
@@ -47,6 +53,8 @@ func New(d Deps) *gin.Engine {
 	api.POST("/auth/register", d.Auth.Register)
 	api.POST("/auth/login", d.Auth.Login)
 	api.POST("/auth/refresh", d.Auth.Refresh)
+	api.GET("/auth/github", d.OAuth.Start)
+	api.GET("/auth/github/callback", d.OAuth.Callback)
 	api.GET("/auth/me", middleware.Auth(d.Tokens), d.Auth.Me)
 
 	public := api.Group("")
@@ -58,6 +66,8 @@ func New(d Deps) *gin.Engine {
 	public.GET("/cheatsheet", d.Content.Cheatsheet)
 	public.GET("/search", d.Content.Search)
 	public.GET("/certificates/:code", d.Engagement.PublicCertificate)
+	public.GET("/leaderboard", d.Leaderboard.Top)
+	public.GET("/lessons/:slug/comments", d.Community.List)
 
 	protected := api.Group("")
 	protected.Use(middleware.Auth(d.Tokens))
@@ -71,6 +81,18 @@ func New(d Deps) *gin.Engine {
 	protected.POST("/reviews/:id/answer", d.Quiz.AnswerReview)
 	protected.GET("/stats", d.Engagement.Stats)
 	protected.GET("/certificate", d.Engagement.Certificate)
+	protected.POST("/lessons/:slug/comments", d.Community.Create)
+	protected.DELETE("/comments/:id", d.Community.Delete)
+
+	admin := api.Group("/admin")
+	admin.Use(middleware.Admin(d.Tokens, d.Users))
+	admin.GET("/lessons", d.Admin.ListLessons)
+	admin.GET("/lessons/:id", d.Admin.GetLesson)
+	admin.PATCH("/lessons/:id", d.Admin.UpdateLesson)
+	admin.GET("/lessons/:id/quizzes", d.Admin.ListQuizzes)
+	admin.POST("/lessons/:id/quizzes", d.Admin.CreateQuiz)
+	admin.PATCH("/quizzes/:id", d.Admin.UpdateQuiz)
+	admin.DELETE("/quizzes/:id", d.Admin.DeleteQuiz)
 
 	return r
 }

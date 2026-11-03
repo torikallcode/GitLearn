@@ -76,3 +76,27 @@ type ReviewRepository interface {
 	Upsert(ctx context.Context, item *domain.ReviewItem) error
 	UpdateSchedule(ctx context.Context, reviewID, userID uint64, intervalDays int, ease float64, next time.Time) error
 }
+
+// CommentRepository persists lesson discussions.
+type CommentRepository interface {
+	ListByLesson(ctx context.Context, lessonID uint64) ([]domain.Comment, error)
+	Get(ctx context.Context, id uint64) (*domain.Comment, error)
+	Create(ctx context.Context, comment *domain.Comment) error
+	Delete(ctx context.Context, id uint64) error
+}
+
+// LeaderboardRepository reads the public XP ranking.
+type LeaderboardRepository interface {
+	TopXP(ctx context.Context, limit int) ([]domain.LeaderboardEntry, error)
+}
+
+// AdminRepository reads and writes curriculum content for the CMS.
+type AdminRepository interface {
+	ListLessons(ctx context.Context) ([]domain.LessonContext, error)
+	GetLesson(ctx context.Context, id uint64) (*domain.LessonContext, error)
+	UpdateLesson(ctx context.Context, lesson *domain.Lesson) error
+	GetQuiz(ctx context.Context, id uint64) (*domain.Quiz, error)
+	CreateQuiz(ctx context.Context, quiz *domain.Quiz) error
+	UpdateQuiz(ctx context.Context, quiz *domain.Quiz) error
+	DeleteQuiz(ctx context.Context, id uint64) error
+}
